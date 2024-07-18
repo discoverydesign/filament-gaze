@@ -1,0 +1,27 @@
+{
+    "name": "owainjones74/filament-gaze",
+    "description": "See who else is viewing a resource at the same time as you.",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "OwainJones74\\FilamentGaze\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Owain Jones"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "filament/support": "^3.0"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "OwainJones74\\FilamentGaze\\FilamentGazeServiceProvider"
+            ]
+        }
+    }
+}
