@@ -11,11 +11,19 @@ class GazeBanner extends Component
 {
     public array $currentViewers = [];
     public string|null $identifier = null;
+    public string|int $pollTimer = 30;
 
     // Set a custom identifier.
     public function identifier($identifier)
     {
         $this->identifier = $identifier;
+
+        return $this;
+    }
+
+    public function pollTimer($poll)
+    {
+        $this->pollTimer = $poll;
 
         return $this;
     }
@@ -112,6 +120,7 @@ class GazeBanner extends Component
             'show' => $filteredViewers->count() >= 1,
             'currentViewers' => $this->currentViewers,
             'text' => $finalText,
+            'pollTimer' => $this->pollTimer,
         ]);
     }
 
