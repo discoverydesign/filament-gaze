@@ -16,7 +16,7 @@ class FilamentGazePlugin implements Plugin
 
     public function getId(): string
     {
-        return 'gaze';
+        return 'filament-gaze';
     }
 
     public function boot(Panel $panel): void
