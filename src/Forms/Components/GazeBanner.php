@@ -53,26 +53,13 @@ class GazeBanner extends Component
         ];
 
         // Testing
+        /*
         $curViewers[] = [
             'id' => 2,
             'name' => 'User 2',
             'expires' => Carbon::now()->addMinutes(2),
         ];
-        $curViewers[] = [
-            'id' => 3,
-            'name' => 'User 3',
-            'expires' => Carbon::now()->addMinutes(2),
-        ];
-        $curViewers[] = [
-            'id' => 4,
-            'name' => 'User 4',
-            'expires' => Carbon::now()->addMinutes(2),
-        ];
-        $curViewers[] = [
-            'id' => 5,
-            'name' => 'User 5',
-            'expires' => Carbon::now()->addMinutes(2),
-        ];
+        */
 
         $this->currentViewers = $curViewers;
 
@@ -87,20 +74,33 @@ class GazeBanner extends Component
             return $viewer['id'] != auth()->id();
         });
 
+        $finalText = '';
+
         if ($filteredViewers->count() > 2) {
             $formattedViewers = $filteredViewers->first()['name'];
             $formattedViewers .= ', ';
             $formattedViewers .= $filteredViewers->skip(1)->first()['name'];
-            $formattedViewers .= ' and ';
-            $formattedViewers .= $filteredViewers->count() - 2 . ' others';
+
+            $extras = $filteredViewers->count() - 2;
+
+            $finalText = __($extras > 1 ? 'filament-gaze::gaze.banner_text_others' : 'filament-gaze::gaze.banner_text_other', [
+                'viewers' => $formattedViewers,
+                'count' => $extras
+            ]);
+
         } else {
             $formattedViewers = $filteredViewers->implode('name', ' & ');
+
+            $finalText = __('filament-gaze::gaze.banner_text', [
+                'viewers' => $formattedViewers
+            ]);
         }
+
 
         return view('filament-gaze::forms.components.gaze-banner', [
             'show' => $filteredViewers->count() >= 1,
             'currentViewers' => $this->currentViewers,
-            'text' => 'This page is currently being viewed by ' . $formattedViewers . '.',
+            'text' => $finalText,
         ]);
     }
 

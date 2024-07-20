@@ -13,10 +13,9 @@ class FilamentGazeServiceProvider extends PackageServiceProvider
     {
         $package
             ->name('filament-gaze')
+            ->hasTranslations()
             ->hasViews();
     }
 
-    public function packageBooted(): void
-    {
-    }
+    public function packageBooted(): void {}
 }
