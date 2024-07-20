@@ -10,29 +10,33 @@ use Illuminate\Support\Facades\Cache;
 class GazeBanner extends Component
 {
     public array $currentViewers = [];
+    public string|null $identifier = null;
 
-    final public function __construct()
+    // Set a custom identifier.
+    public function identifier($identifier)
     {
-        $this->refreshViewers();
+        $this->identifier = $identifier;
 
-        if (count($this->currentViewers) <= 1) {
-            $this->hidden();
-        }
+        return $this;
     }
 
     public function refreshViewers()
     {
-        // Todo: Possibly change this to something model bound?
-        // That way it'll work on resources that share a model?
-        $identified = request()->getUri();
-        $authGuard = Filament::getCurrentPanel()->getAuthGuard();
+        if (!$this->identifier) {
+            $record = $this->getRecord();
+            if (!$record) return;
 
+            $this->identifier = get_class($record) . '-' . $record->id;
+        }
+
+        $identifier = $this->identifier;
+        $authGuard = Filament::getCurrentPanel()->getAuthGuard();
         // There must be a better way to do this?
         $guardProvider = config('auth.guards.' . $authGuard . '.provider');
         $guardModel = config('auth.providers.' . $guardProvider . '.model');
 
         // Check over all current viewers
-        $curViewers = Cache::get('filament-gaze-' . $identified, []);
+        $curViewers = Cache::get('filament-gaze-' . $identifier, []);
         foreach ($curViewers as $key => $viewer) {
             $model = $guardModel::find($viewer['id']);
             $expires = Carbon::parse($viewer['expires']);
@@ -67,11 +71,14 @@ class GazeBanner extends Component
 
         $this->currentViewers = $curViewers;
 
-        Cache::put('filament-gaze-' . $identified, $curViewers, now()->addMinutes(2));
+        Cache::put('filament-gaze-' . $identifier, $curViewers, now()->addMinutes(2));
     }
+
 
     public function render(): \Illuminate\Contracts\View\View
     {
+        $this->refreshViewers();
+
         $formattedViewers = '';
         $currentViewers = collect($this->currentViewers);
         $filteredViewers = $currentViewers->filter(function ($viewer) {
