@@ -14,6 +14,10 @@ class GazeBanner extends Component
     final public function __construct()
     {
         $this->refreshViewers();
+
+        if (count($this->currentViewers) <= 1) {
+            $this->hidden();
+        }
     }
 
     public function refreshViewers()
