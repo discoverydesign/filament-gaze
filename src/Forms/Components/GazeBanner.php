@@ -1,18 +1,17 @@
 <?php
 
-namespace OwainJones74\FilamentGaze\Livewire;
+namespace OwainJones74\FilamentGaze\Forms\Components;
 
 use Carbon\Carbon;
 use Filament\Facades\Filament;
-use Filament\Support\Facades\FilamentColor;
+use Filament\Forms\Components\Component;
 use Illuminate\Support\Facades\Cache;
-use Livewire\Component;
 
-class FilamentGazeBanner extends Component
+class GazeBanner extends Component
 {
     public array $currentViewers = [];
 
-    public function mount()
+    final public function __construct()
     {
         $this->refreshViewers();
     }
@@ -30,17 +29,17 @@ class FilamentGazeBanner extends Component
 
         // Check over all current viewers
         $curViewers = Cache::get('filament-gaze-' . $identified, []);
-        foreach($curViewers as $key => $viewer) {
+        foreach ($curViewers as $key => $viewer) {
             $model = $guardModel::find($viewer['id']);
             $expires = Carbon::parse($viewer['expires']);
 
             // Remove exipred viewers
-            if($expires->isPast()) {
+            if ($expires->isPast()) {
                 unset($curViewers[$key]);
             }
 
             // If current user, remove them so they can be readded below.
-            if(!$model || ($model?->id == auth()?->id())) {
+            if (! $model || ($model?->id == auth()?->id())) {
                 unset($curViewers[$key]);
             }
         }
@@ -80,16 +79,11 @@ class FilamentGazeBanner extends Component
         Cache::put('filament-gaze-' . $identified, $curViewers, now()->addMinutes(2));
     }
 
-    public function ping()
-    {
-
-    }
-
-    public function render()
+    public function render(): \Illuminate\Contracts\View\View
     {
         $formattedViewers = '';
         $currentViewers = collect($this->currentViewers);
-        $filteredViewers = $currentViewers->filter(function($viewer) {
+        $filteredViewers = $currentViewers->filter(function ($viewer) {
             return $viewer['id'] != auth()->id();
         });
 
@@ -103,10 +97,18 @@ class FilamentGazeBanner extends Component
             $formattedViewers = $filteredViewers->implode('name', ' & ');
         }
 
-        return view('filament-gaze::livewire.filament-gaze-banner', [
+        return view('filament-gaze::forms.components.gaze-banner', [
             'show' => $filteredViewers->count() >= 1,
             'currentViewers' => $this->currentViewers,
-            'text' => 'This page is currently being viewed by ' . $formattedViewers . '.'
+            'text' => 'This page is currently being viewed by ' . $formattedViewers . '.',
         ]);
+    }
+
+    public static function make(array | Closure $schema = []): static
+    {
+        $static = app(static::class, ['schema' => $schema]);
+        $static->configure();
+
+        return $static;
     }
 }

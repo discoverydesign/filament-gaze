@@ -2,10 +2,8 @@
 
 namespace OwainJones74\FilamentGaze;
 
-
 use Filament\Contracts\Plugin;
 use Filament\Panel;
-use OwainJones74\FilamentGaze\Http\Middleware\RenderHook;
 
 class FilamentGazePlugin implements Plugin
 {
@@ -24,11 +22,5 @@ class FilamentGazePlugin implements Plugin
         //
     }
 
-    public function register(Panel $panel): void
-    {
-
-        $panel->middleware([
-            RenderHook::class,
-        ]);
-    }
+    public function register(Panel $panel): void {}
 }

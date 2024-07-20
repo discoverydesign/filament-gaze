@@ -2,16 +2,13 @@
 
 namespace OwainJones74\FilamentGaze;
 
-use Filament\Support\Facades\FilamentView;
-use Filament\View\PanelsRenderHook;
-use Illuminate\Support\Facades\Blade;
-use Livewire\Livewire;
-use OwainJones74\FilamentGaze\Livewire\FilamentGazeBanner;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
 class FilamentGazeServiceProvider extends PackageServiceProvider
 {
+    public static string $name = 'filament-gaze';
+
     public function configurePackage(Package $package): void
     {
         $package
@@ -19,9 +16,7 @@ class FilamentGazeServiceProvider extends PackageServiceProvider
             ->hasViews();
     }
 
-    public function packageBooted()
+    public function packageBooted(): void
     {
-        // Register the component with Livewire, so we can use all of its goodness
-        Livewire::component('filament-gaze-banner', FilamentGazeBanner::class);
     }
 }

@@ -15,7 +15,8 @@
     ],
     "minimum-stability": "dev",
     "require": {
-        "filament/support": "^3.0"
+        "filament/filament": "^3.0",
+        "spatie/laravel-package-tools": "^1.15.0"
     },
     "extra": {
         "laravel": {
