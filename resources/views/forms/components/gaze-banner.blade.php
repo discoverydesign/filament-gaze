@@ -1,7 +1,7 @@
 <div>
     <div
         x-data="{}"
-        wire:poll.60s="refreshViewers"
+        wire:poll.30s
     >
         @if($show)
             <div>
