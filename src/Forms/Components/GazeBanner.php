@@ -64,10 +64,10 @@ class GazeBanner extends Component
             }
         }
 
-        $user = auth()->user();
+        $user = auth()->guard($authGuard)->user();
         // Add/readd the current user to the list
         $curViewers[] = [
-            'id' => auth()->id(),
+            'id' => auth()->guard($authGuard)->id(),
             'name' => $user?->name ?? $user?->getFilamentName() ?? 'Unknown', // Possibly need to account for more?
             'expires' => now()->addSeconds($this->pollTimer * 2),
         ];
