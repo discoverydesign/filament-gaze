@@ -2,7 +2,7 @@
 
 👀 See who's viewing a resource in Filament PHP 🔭
 
-![](media/1.png)
+![](media/1.jpg)
 
 This packages allows you to display when other users are viewing the same resource in Filament PHP.
 
