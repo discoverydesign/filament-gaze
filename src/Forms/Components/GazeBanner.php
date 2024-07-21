@@ -10,8 +10,10 @@ use Illuminate\Support\Facades\Cache;
 class GazeBanner extends Component
 {
     public array $currentViewers = [];
-    public string|null $identifier = null;
-    public string|int $pollTimer = 30;
+
+    public ?string $identifier = null;
+
+    public string | int $pollTimer = 30;
 
     // Set a custom identifier.
     public function identifier($identifier)
@@ -30,9 +32,11 @@ class GazeBanner extends Component
 
     public function refreshViewers()
     {
-        if (!$this->identifier) {
+        if (! $this->identifier) {
             $record = $this->getRecord();
-            if (!$record) return;
+            if (! $record) {
+                return;
+            }
 
             $this->identifier = get_class($record) . '-' . $record->id;
         }
@@ -64,24 +68,14 @@ class GazeBanner extends Component
         // Add/readd the current user to the list
         $curViewers[] = [
             'id' => auth()->id(),
-            'name' => $user?->name ?? $user->getFilamentName() ?? 'Unknown',
-            'expires' => Carbon::now()->addMinutes(2),
+            'name' => $user?->name ?? $user?->getFilamentName() ?? 'Unknown', // Possibly need to account for more?
+            'expires' => now()->addSeconds($this->pollTimer * 2),
         ];
-
-        // Testing
-        /*
-        $curViewers[] = [
-            'id' => 2,
-            'name' => 'User 2',
-            'expires' => Carbon::now()->addMinutes(2),
-        ];
-        */
 
         $this->currentViewers = $curViewers;
 
-        Cache::put('filament-gaze-' . $identifier, $curViewers, now()->addMinutes(2));
+        Cache::put('filament-gaze-' . $identifier, $curViewers, now()->addSeconds($this->pollTimer * 2));
     }
-
 
     public function render(): \Illuminate\Contracts\View\View
     {
@@ -104,17 +98,16 @@ class GazeBanner extends Component
 
             $finalText = __($extras > 1 ? 'filament-gaze::gaze.banner_text_others' : 'filament-gaze::gaze.banner_text_other', [
                 'viewers' => $formattedViewers,
-                'count' => $extras
+                'count' => $extras,
             ]);
 
         } else {
             $formattedViewers = $filteredViewers->implode('name', ' & ');
 
             $finalText = __('filament-gaze::gaze.banner_text', [
-                'viewers' => $formattedViewers
+                'viewers' => $formattedViewers,
             ]);
         }
-
 
         return view('filament-gaze::forms.components.gaze-banner', [
             'show' => $filteredViewers->count() >= 1,
