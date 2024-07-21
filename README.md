@@ -10,10 +10,10 @@ https://packagist.org/packages/owainjones74/filament-gaze
 
 ## How to use
 1. Install the package using `composer require owainjones74/filament-gaze`
-2. Add `OwainJones74\FilamentGaze\FilamentGazePlugin::make()` to your Filament Panel provider. 
+2. Add `\OwainJones74\FilamentGaze\FilamentGazePlugin::make()` to your Filament Panel provider. 
 ```
 $panel->plugins([
-    OwainJones74\FilamentGaze\FilamentGazePlugin::make()
+    \OwainJones74\FilamentGaze\FilamentGazePlugin::make()
 ])
 ```
 3. Import the package inside your Filament Resource with `use OwainJones74\FilamentGaze\Forms\Components\GazeBanner`.
