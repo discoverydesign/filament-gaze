@@ -35,10 +35,10 @@ class GazeBanner extends Component
         if (! $this->identifier) {
             $record = $this->getRecord();
             if (! $record) {
-                return;
+                $this->identifier = (string)$this->getModel();
+            } else {
+                $this->identifier = get_class($record) . '-' . $record->id;
             }
-
-            $this->identifier = get_class($record) . '-' . $record->id;
         }
 
         $identifier = $this->identifier;
