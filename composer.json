@@ -1,6 +1,6 @@
 {
     "name": "owainjones74/filament-gaze",
-    "description": "See who else is viewing a resource at the same time as you.",
+    "description": "See who's viewing a resource in Filament PHP.",
     "type": "library",
     "license": "MIT",
     "autoload": {
