@@ -12,7 +12,7 @@ https://packagist.org/packages/owainjones74/filament-gaze
 1. Install the package using `composer require owainjones74/filament-gaze`
 2. Add `OwainJones74\FilamentGaze\FilamentGazePlugin::make()` to your Filament Panel provider. 
 ```
-->plugins([
+$panel->plugins([
     OwainJones74\FilamentGaze\FilamentGazePlugin::make()
 ])
 ```
