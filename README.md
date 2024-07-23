@@ -6,17 +6,17 @@
 
 This packages allows you to display when other users are viewing the same resource in Filament PHP.
 
-https://packagist.org/packages/owainjones74/filament-gaze
+https://packagist.org/packages/discoverydesign/filament-gaze
 
 ## How to use
-1. Install the package using `composer require owainjones74/filament-gaze`
-2. Add `\OwainJones74\FilamentGaze\FilamentGazePlugin::make()` to your Filament Panel provider. 
+1. Install the package using `composer require discoverydesign/filament-gaze`
+2. Add `\DiscoveryDesign\FilamentGaze\FilamentGazePlugin::make()` to your Filament Panel provider. 
 ```
 $panel->plugins([
-    \OwainJones74\FilamentGaze\FilamentGazePlugin::make()
+    \DiscoveryDesign\FilamentGaze\FilamentGazePlugin::make()
 ])
 ```
-3. Import the package inside your Filament Resource with `use OwainJones74\FilamentGaze\Forms\Components\GazeBanner`.
+3. Import the package inside your Filament Resource with `use DiscoveryDesign\FilamentGaze\Forms\Components\GazeBanner`.
 4. Add the `GazeBanner` form component to your form with `GazeBanner::make()`.
 5. If required, publish the translation files with `php artisan vendor:publish --tag=filament-gaze-translations`.
 
@@ -28,7 +28,7 @@ $panel->plugins([
 
 namespace App\Filament\Resources;
 
-use OwainJones74\FilamentGaze\Forms\Components\GazeBanner;
+use DiscoveryDesign\FilamentGaze\Forms\Components\GazeBanner;
 // ...
 
 class OrderResource extends Resource

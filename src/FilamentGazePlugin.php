@@ -1,6 +1,6 @@
 <?php
 
-namespace OwainJones74\FilamentGaze;
+namespace DiscoveryDesign\FilamentGaze;
 
 use Filament\Contracts\Plugin;
 use Filament\Panel;

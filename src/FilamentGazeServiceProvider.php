@@ -1,6 +1,6 @@
 <?php
 
-namespace OwainJones74\FilamentGaze;
+namespace DiscoveryDesign\FilamentGaze;
 
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;

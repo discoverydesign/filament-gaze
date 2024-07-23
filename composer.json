@@ -5,12 +5,12 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "OwainJones74\\FilamentGaze\\": "src/"
+            "DiscoveryDesign\\FilamentGaze\\": "src/"
         }
     },
     "authors": [
         {
-            "name": "Owain Jones"
+            "name": "Discovery Design"
         }
     ],
     "minimum-stability": "dev",
@@ -21,7 +21,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "OwainJones74\\FilamentGaze\\FilamentGazeServiceProvider"
+                "DiscoveryDesign\\FilamentGaze\\FilamentGazeServiceProvider"
             ]
         }
     }

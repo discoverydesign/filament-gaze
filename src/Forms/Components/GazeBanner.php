@@ -1,6 +1,6 @@
 <?php
 
-namespace OwainJones74\FilamentGaze\Forms\Components;
+namespace DiscoveryDesign\FilamentGaze\Forms\Components;
 
 use Carbon\Carbon;
 use Filament\Facades\Filament;
