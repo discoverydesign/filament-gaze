@@ -4,6 +4,8 @@ namespace DiscoveryDesign\FilamentGaze;
 
 use Filament\Contracts\Plugin;
 use Filament\Panel;
+use Filament\Support\Assets\Css;
+use Filament\Support\Facades\FilamentAsset;
 
 /**
  * Class FilamentGazePlugin

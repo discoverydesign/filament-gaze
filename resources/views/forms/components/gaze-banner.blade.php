@@ -1,4 +1,5 @@
 <div
+    class="gaze-banner @if($show) gaze-banner--has-content @endif"
     x-data="{}"
     wire:poll.{{ $pollTimer }}s
 >

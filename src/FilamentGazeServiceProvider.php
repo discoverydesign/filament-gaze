@@ -2,6 +2,8 @@
 
 namespace DiscoveryDesign\FilamentGaze;
 
+use Filament\Support\Assets\Css;
+use Filament\Support\Facades\FilamentAsset;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
@@ -38,5 +40,9 @@ class FilamentGazeServiceProvider extends PackageServiceProvider
      *
      * @return void
      */
-    public function packageBooted(): void {}
+    public function packageBooted(): void {
+        FilamentAsset::register([
+            Css::make('filament-gaze-stylesheet', __DIR__ . '/../dist/filament-gaze.css'),
+        ]);
+    }
 }

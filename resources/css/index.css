@@ -1,0 +1,4 @@
+/* We use this to prevent the gap/space creating ghost elements */
+div:has(> .gaze-banner:not(.gaze-banner--has-content)) {
+    display: none;
+}

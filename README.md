@@ -16,9 +16,10 @@ $panel->plugins([
     \DiscoveryDesign\FilamentGaze\FilamentGazePlugin::make()
 ])
 ```
-3. Import the package inside your Filament Resource with `use DiscoveryDesign\FilamentGaze\Forms\Components\GazeBanner`.
-4. Add the `GazeBanner` form component to your form with `GazeBanner::make()`.
-5. If required, publish the translation files with `php artisan vendor:publish --tag=filament-gaze-translations`.
+3. Publish the assets with `php artisan filament:assets`.
+4. Import the package inside your Filament Resource with `use DiscoveryDesign\FilamentGaze\Forms\Components\GazeBanner`.
+5. Add the `GazeBanner` form component to your form with `GazeBanner::make()`.
+6. If required, publish the translation files with `php artisan vendor:publish --tag=filament-gaze-translations`.
 
 ## Examples
 
