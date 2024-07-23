@@ -7,15 +7,43 @@ use Filament\Facades\Filament;
 use Filament\Forms\Components\Component;
 use Illuminate\Support\Facades\Cache;
 
+/**
+ * Class GazeBanner
+ *
+ * Represents a custom form component called GazeBanner.
+ * This component displays a banner with the names of the current viewers.
+ * It provides methods to set a custom identifier and the poll timer.
+ * The component refreshes the list of viewers and renders the banner.
+ */
 class GazeBanner extends Component
 {
+    /**
+     * The array of current viewers.
+     *
+     * @var array
+     */
     public array $currentViewers = [];
 
+    /**
+     * The custom identifier for the GazeBanner component.
+     *
+     * @var string|null
+     */
     public ?string $identifier = null;
 
+    /**
+     * The poll timer for refreshing the list of viewers.
+     *
+     * @var string|int
+     */
     public string | int $pollTimer = 30;
 
-    // Set a custom identifier.
+    /**
+     * Set a custom identifier for the GazeBanner component.
+     *
+     * @param string $identifier
+     * @return $this
+     */
     public function identifier($identifier)
     {
         $this->identifier = $identifier;
@@ -23,6 +51,12 @@ class GazeBanner extends Component
         return $this;
     }
 
+    /**
+     * Set the poll timer for refreshing the list of viewers.
+     *
+     * @param int $poll
+     * @return $this
+     */
     public function pollTimer($poll)
     {
         $this->pollTimer = $poll;
@@ -30,6 +64,14 @@ class GazeBanner extends Component
         return $this;
     }
 
+    /**
+     * Refresh the list of viewers.
+     *
+     * If no custom identifier is set, it will use the model's identifier.
+     * It retrieves the current viewers, removes expired viewers, and adds/re-adds the current user.
+     *
+     * @return void
+     */
     public function refreshViewers()
     {
         if (! $this->identifier) {
@@ -43,7 +85,8 @@ class GazeBanner extends Component
 
         $identifier = $this->identifier;
         $authGuard = Filament::getCurrentPanel()->getAuthGuard();
-        // There must be a better way to do this?
+        
+        // Todo: refactor this
         $guardProvider = config('auth.guards.' . $authGuard . '.provider');
         $guardModel = config('auth.providers.' . $guardProvider . '.model');
 
@@ -53,19 +96,19 @@ class GazeBanner extends Component
             $model = $guardModel::find($viewer['id']);
             $expires = Carbon::parse($viewer['expires']);
 
-            // Remove exipred viewers
+            // Remove expired viewers
             if ($expires->isPast()) {
                 unset($curViewers[$key]);
             }
 
-            // If current user, remove them so they can be readded below.
+            // If current user, remove them so they can be re-added below.
             if (! $model || ($model?->id == auth()?->id())) {
                 unset($curViewers[$key]);
             }
         }
 
         $user = auth()->guard($authGuard)->user();
-        // Add/readd the current user to the list
+        // Add/re-add the current user to the list
         $curViewers[] = [
             'id' => auth()->guard($authGuard)->id(),
             'name' => $user?->name ?? $user?->getFilamentName() ?? 'Unknown', // Possibly need to account for more?
@@ -77,6 +120,13 @@ class GazeBanner extends Component
         Cache::put('filament-gaze-' . $identifier, $curViewers, now()->addSeconds($this->pollTimer * 2));
     }
 
+    /**
+     * Render the GazeBanner component.
+     *
+     * It refreshes the list of viewers, formats the viewer names, and returns the rendered view.
+     *
+     * @return \Illuminate\Contracts\View\View
+     */
     public function render(): \Illuminate\Contracts\View\View
     {
         $this->refreshViewers();
@@ -117,6 +167,12 @@ class GazeBanner extends Component
         ]);
     }
 
+    /**
+     * Create a new instance of the GazeBanner component.
+     *
+     * @param array|\Closure $schema
+     * @return static
+     */
     public static function make(array | Closure $schema = []): static
     {
         $static = app(static::class, ['schema' => $schema]);
