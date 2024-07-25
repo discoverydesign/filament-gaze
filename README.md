@@ -2,7 +2,7 @@
 
 👀 See who's viewing a resource in Filament PHP 🔭
 
-![Preview Image](media/1.jpg)
+![Preview Image](https://raw.githubusercontent.com/discoverydesign/filament-gaze/main/media/1.jpg)
 
 ![Packagist Version](https://img.shields.io/packagist/v/discoverydesign/filament-gaze.svg)
 ![Total Downloads](https://img.shields.io/packagist/dt/discoverydesign/filament-gaze.svg)
