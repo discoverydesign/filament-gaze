@@ -7,7 +7,7 @@
 ![Packagist Version](https://img.shields.io/packagist/v/discoverydesign/filament-gaze.svg)
 ![Total Downloads](https://img.shields.io/packagist/dt/discoverydesign/filament-gaze.svg)
 
-This packages allows you to display when other users are viewing the same resource in Filament PHP.
+This package allows you to display when other users are viewing the same resource in Filament PHP.
 
 https://packagist.org/packages/discoverydesign/filament-gaze
 
