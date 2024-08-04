@@ -89,3 +89,8 @@ GazeBanner::make()
 
 #### Arguments
 `name` - (string) The name of the identifier. Default is the resource's model class combines with model Id.
+
+## Author
+
+🚀 [Discovery Design](https://discoverydesign.co.uk)
+
