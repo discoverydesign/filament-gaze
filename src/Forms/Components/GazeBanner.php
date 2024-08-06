@@ -19,29 +19,23 @@ class GazeBanner extends Component
 {
     /**
      * The array of current viewers.
-     *
-     * @var array
      */
     public array $currentViewers = [];
 
     /**
      * The custom identifier for the GazeBanner component.
-     *
-     * @var string|null
      */
     public ?string $identifier = null;
 
     /**
      * The poll timer for refreshing the list of viewers.
-     *
-     * @var string|int
      */
     public string | int $pollTimer = 30;
 
     /**
      * Set a custom identifier for the GazeBanner component.
      *
-     * @param string $identifier
+     * @param  string  $identifier
      * @return $this
      */
     public function identifier($identifier)
@@ -54,7 +48,7 @@ class GazeBanner extends Component
     /**
      * Set the poll timer for refreshing the list of viewers.
      *
-     * @param int $poll
+     * @param  int  $poll
      * @return $this
      */
     public function pollTimer($poll)
@@ -77,7 +71,7 @@ class GazeBanner extends Component
         if (! $this->identifier) {
             $record = $this->getRecord();
             if (! $record) {
-                $this->identifier = (string)$this->getModel();
+                $this->identifier = (string) $this->getModel();
             } else {
                 $this->identifier = get_class($record) . '-' . $record->id;
             }
@@ -85,7 +79,7 @@ class GazeBanner extends Component
 
         $identifier = $this->identifier;
         $authGuard = Filament::getCurrentPanel()->getAuthGuard();
-        
+
         // Todo: refactor this
         $guardProvider = config('auth.guards.' . $authGuard . '.provider');
         $guardModel = config('auth.providers.' . $guardProvider . '.model');
@@ -124,8 +118,6 @@ class GazeBanner extends Component
      * Render the GazeBanner component.
      *
      * It refreshes the list of viewers, formats the viewer names, and returns the rendered view.
-     *
-     * @return \Illuminate\Contracts\View\View
      */
     public function render(): \Illuminate\Contracts\View\View
     {
@@ -170,8 +162,7 @@ class GazeBanner extends Component
     /**
      * Create a new instance of the GazeBanner component.
      *
-     * @param array|\Closure $schema
-     * @return static
+     * @param  array|\Closure  $schema
      */
     public static function make(array | Closure $schema = []): static
     {
