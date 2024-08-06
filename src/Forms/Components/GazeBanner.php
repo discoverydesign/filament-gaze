@@ -30,7 +30,7 @@ class GazeBanner extends Component
     /**
      * The poll timer for refreshing the list of viewers.
      */
-    public string | int $pollTimer = 30;
+    public string | int $pollTimer = 10;
 
     /**
      * Set a custom identifier for the GazeBanner component.
