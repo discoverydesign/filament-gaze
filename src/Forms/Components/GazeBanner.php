@@ -4,9 +4,12 @@ namespace DiscoveryDesign\FilamentGaze\Forms\Components;
 
 use Carbon\Carbon;
 use Closure;
+use Filament\Actions\Contracts\HasLivewire;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Component;
+use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Cache;
+use Livewire\Livewire;
 
 /**
  * Class GazeBanner
@@ -84,9 +87,19 @@ class GazeBanner extends Component
     /**
      * Set the lock state
      */
-    public function lock(): static
+    public function lock($state = true): static
     {
-        $this->isLockable = true;
+        $this->isLockable = $state;
+
+        if ($state) {
+            $this->registerListeners([
+                'FilamentGaze::takeControl' => [
+                    function() {
+                        $this->takeControl();
+                    },
+                ],
+            ]);
+        }
 
         return $this;
     }
@@ -99,6 +112,23 @@ class GazeBanner extends Component
         $this->canTakeControl = (bool) $this->evaluate($fnc);
 
         return $this;
+    }
+
+    public function takeControl()
+    {
+        // Set everyone but self to false
+        $identifier = $this->identifier;
+        $curViewers = Cache::get('filament-gaze-' . $identifier, []);
+
+        foreach ($curViewers as $key => $viewer) {
+            $curViewers[$key]['has_control'] = false;
+
+            if ($viewer['id'] == auth()->id()) {
+                $curViewers[$key]['has_control'] = true;
+            }
+        }
+
+        Cache::put('filament-gaze-' . $identifier, $curViewers, now()->addSeconds($this->pollTimer * 2));
     }
 
     /**

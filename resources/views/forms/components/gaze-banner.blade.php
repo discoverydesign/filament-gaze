@@ -38,7 +38,7 @@
                     </div>
 
                     @if($isLockable && !$hasControl && $canTakeControl)
-                        <x-filament::button class="my-auto mt-2 md:mt-0" color="primary">
+                        <x-filament::button class="my-auto mt-2 md:mt-0" color="primary" wire:click="dispatchFormEvent('FilamentGaze::takeControl')">
                             Take Control
                         </x-filament::button>
                     @endif
