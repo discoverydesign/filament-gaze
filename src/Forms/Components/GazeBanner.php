@@ -231,6 +231,11 @@ class GazeBanner extends Component
         }
 
         $lockUser = collect($this->currentViewers)->where('has_control', true)->first();
+        $hasControl = $lockUser['id'] == auth()->id();
+
+        if ($this->isLockable) {
+            $this->getLivewire()->getForm('form')->disabled(!$hasControl);
+        }
 
         return view('filament-gaze::forms.components.gaze-banner', [
             'show' => $filteredViewers->count() >= 1,
@@ -239,7 +244,7 @@ class GazeBanner extends Component
             'pollTimer' => $this->pollTimer,
             'isLockable' => $this->isLockable,
             'controlUser' => $lockUser ?? false,
-            'hasControl' => $lockUser['id'] == auth()->id(),
+            'hasControl' => $hasControl,
             'canTakeControl' => $this->canTakeControl,
         ]);
     }
