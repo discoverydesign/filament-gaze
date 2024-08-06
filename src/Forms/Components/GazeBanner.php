@@ -3,6 +3,7 @@
 namespace DiscoveryDesign\FilamentGaze\Forms\Components;
 
 use Carbon\Carbon;
+use Closure;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Component;
 use Illuminate\Support\Facades\Cache;
@@ -36,6 +37,11 @@ class GazeBanner extends Component
      * Whether the lockable trait has been enabled.
      */
     public bool $isLockable = false;
+
+    /**
+     * Whether the lockable trait has been enabled.
+     */
+    public bool $canTakeControl = false;
 
     /**
      * Set a custom identifier for the GazeBanner component.
@@ -89,6 +95,8 @@ class GazeBanner extends Component
         $guardProvider = config('auth.guards.' . $authGuard . '.provider');
         $guardModel = config('auth.providers.' . $guardProvider . '.model');
 
+        $lockState = false;
+
         // Check over all current viewers
         $curViewers = Cache::get('filament-gaze-' . $identifier, []);
         foreach ($curViewers as $key => $viewer) {
@@ -102,6 +110,9 @@ class GazeBanner extends Component
 
             // If current user, remove them so they can be re-added below.
             if (! $model || ($model?->id == auth()?->id())) {
+
+                $lockState = $viewer['has_control'];
+
                 unset($curViewers[$key]);
             }
         }
@@ -112,6 +123,7 @@ class GazeBanner extends Component
             'id' => auth()->guard($authGuard)->id(),
             'name' => $user?->name ?? $user?->getFilamentName() ?? 'Unknown', // Possibly need to account for more?
             'expires' => now()->addSeconds($this->pollTimer * 2),
+            'has_control' => $this->isLockable && ($lockState || (count($curViewers) === 0)),
         ];
 
         $this->currentViewers = $curViewers;
@@ -156,18 +168,22 @@ class GazeBanner extends Component
             ]);
         }
 
+        $lockUser = collect($this->currentViewers)->where('has_control', true)->first();
+
         return view('filament-gaze::forms.components.gaze-banner', [
             'show' => $filteredViewers->count() >= 1,
             'currentViewers' => $this->currentViewers,
             'text' => $finalText,
             'pollTimer' => $this->pollTimer,
+            'isLockable' => $this->isLockable,
+            'controlUser' => $lockUser ?? false,
+            'hasControl' => $lockUser['id'] == auth()->id(),
+            'canTakeControl' => $this->canTakeControl,
         ]);
     }
 
     /**
      * Create a new instance of the GazeBanner component.
-     *
-     * @param  array|\Closure  $schema
      */
     public static function make(array | Closure $schema = []): static
     {
@@ -177,9 +193,16 @@ class GazeBanner extends Component
         return $static;
     }
 
-    public function lock()
+    public function lock(): static
     {
         $this->isLockable = true;
+
+        return $this;
+    }
+
+    public function canTakeControl(bool | Closure $fnc = true): static
+    {
+        $this->canTakeControl = (bool) $this->evaluate($fnc);
 
         return $this;
     }
