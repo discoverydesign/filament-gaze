@@ -1,7 +1,7 @@
 <div
     class="gaze-banner @if($show) gaze-banner--has-content @endif"
     x-data="{}"
-    wire:poll.{{ $pollTimer }}s
+    wire:poll.{{ $pollTimer }}s="dispatchFormEvent('FilamentGaze::refreshViewers')"
 >
     @if($show)
         <div>
@@ -28,7 +28,7 @@
                         @if($isLockable)
                             @if($hasControl)
                                 <p>{{ __('filament-gaze::gaze.lock_is_controller') }}</p>
-                            @else
+                            @elseif($controlUser)
                                 <p>{{ __('filament-gaze::gaze.lock_user_controller', ['name' => $controlUser['name']]) }}</p>
                             @endif
 

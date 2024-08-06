@@ -141,6 +141,14 @@ class GazeBanner extends Component
      */
     public function refreshViewers()
     {
+        $this->registerListeners([
+            'FilamentGaze::takeControl' => [
+                function() {
+                    $this->refreshViewers();
+                },
+            ],
+        ]);
+
         if (! $this->identifier) {
             $record = $this->getRecord();
             if (! $record) {
@@ -231,7 +239,7 @@ class GazeBanner extends Component
         }
 
         $lockUser = collect($this->currentViewers)->where('has_control', true)->first();
-        $hasControl = $lockUser['id'] == auth()->id();
+        $hasControl = isset($lockUser) && $lockUser['id'] == auth()->id();
 
         if ($this->isLockable) {
             $this->getLivewire()->getForm('form')->disabled(!$hasControl);
