@@ -33,6 +33,11 @@ class GazeBanner extends Component
     public string | int $pollTimer = 10;
 
     /**
+     * Whether the lockable trait has been enabled.
+     */
+    public bool $isLockable = false;
+
+    /**
      * Set a custom identifier for the GazeBanner component.
      *
      * @param  string  $identifier
@@ -170,5 +175,12 @@ class GazeBanner extends Component
         $static->configure();
 
         return $static;
+    }
+
+    public function lock()
+    {
+        $this->isLockable = true;
+
+        return $this;
     }
 }
