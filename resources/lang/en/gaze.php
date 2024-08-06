@@ -7,4 +7,5 @@ return [
 
     'lock_is_controller' => 'You currently have control of this page.',
     'lock_user_controller' => ':name currently has control of this page.',
+    'lock_take_control' => 'Take Control',
 ];
