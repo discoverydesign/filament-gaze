@@ -43,6 +43,18 @@ class GazeBanner extends Component
      */
     public bool $canTakeControl = false;
 
+
+    /**
+     * Create a new instance of the GazeBanner component.
+     */
+    public static function make(array | Closure $schema = []): static
+    {
+        $static = app(static::class, ['schema' => $schema]);
+        $static->configure();
+
+        return $static;
+    }
+
     /**
      * Set a custom identifier for the GazeBanner component.
      *
@@ -65,6 +77,26 @@ class GazeBanner extends Component
     public function pollTimer($poll)
     {
         $this->pollTimer = $poll;
+
+        return $this;
+    }
+
+    /**
+     * Set the lock state
+     */
+    public function lock(): static
+    {
+        $this->isLockable = true;
+
+        return $this;
+    }
+
+    /**
+     * Set the take control state
+     */
+    public function canTakeControl(bool | Closure $fnc = true): static
+    {
+        $this->canTakeControl = (bool) $this->evaluate($fnc);
 
         return $this;
     }
@@ -180,30 +212,5 @@ class GazeBanner extends Component
             'hasControl' => $lockUser['id'] == auth()->id(),
             'canTakeControl' => $this->canTakeControl,
         ]);
-    }
-
-    /**
-     * Create a new instance of the GazeBanner component.
-     */
-    public static function make(array | Closure $schema = []): static
-    {
-        $static = app(static::class, ['schema' => $schema]);
-        $static->configure();
-
-        return $static;
-    }
-
-    public function lock(): static
-    {
-        $this->isLockable = true;
-
-        return $this;
-    }
-
-    public function canTakeControl(bool | Closure $fnc = true): static
-    {
-        $this->canTakeControl = (bool) $this->evaluate($fnc);
-
-        return $this;
     }
 }
