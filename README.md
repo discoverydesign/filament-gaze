@@ -2,7 +2,9 @@
 
 👀 See who's viewing a resource in Filament PHP 🔭
 
-![Preview Image](https://raw.githubusercontent.com/discoverydesign/filament-gaze/main/media/1.jpg)
+![Marketing Banner](https://raw.githubusercontent.com/discoverydesign/filament-gaze/main/media/1.jpg)
+![Basic Example](https://raw.githubusercontent.com/discoverydesign/filament-gaze/main/media/3.jpg)
+![Control Example](https://raw.githubusercontent.com/discoverydesign/filament-gaze/main/media/2.jpg)
 
 ![Packagist Version](https://img.shields.io/packagist/v/discoverydesign/filament-gaze.svg)
 ![Total Downloads](https://img.shields.io/packagist/dt/discoverydesign/filament-gaze.svg)
@@ -65,6 +67,19 @@ GazeBanner::make()
     ->identifier('any-order'),
 ```
 
+### Lock Example
+```php
+GazeBanner::make()
+    ->lock()
+```
+
+### Lock With Control Example
+```php
+GazeBanner::make()
+    ->lock()
+    ->canTakeControl(fn() => auth()->user()->isAdmin())
+```
+
 ### Hiding Gaze Banner on Create Form Example
 ```php
 GazeBanner::make()
@@ -89,6 +104,23 @@ GazeBanner::make()
 
 #### Arguments
 `name` - (string) The name of the identifier. Default is the resource's model class combines with model Id.
+
+### `->lock($state)`
+
+#### Description
+`lock` can be used to lock the resource for anyone but the current person editing the form. This can be useful if you want to prevent multiple people from editing the same resource at the same time. The controller is the first person to access the resource, or the person who has taken control of the resource. If you enable this after accessing a resource, you may need to run `php artisan cache:clear` as it is possible that the current cached viewers don't have a marked controller.
+
+#### Arguments
+`state` - (optional, bool) If the resource is lockable or not.
+
+### `->canTakeControl($fnc)`
+
+#### Description
+`canTakeControl` can be used to allow the user to take control of the resource if it is locked by someone else. This can be useful if you want to allow the user to take control of the resource.
+
+#### Arguments
+`fnc` - (optional, closure | bool) If the user can take control of the resource. Default is true. If a closure is passed, it should return a bool.
+
 
 ## Author
 

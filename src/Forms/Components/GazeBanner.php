@@ -3,9 +3,13 @@
 namespace DiscoveryDesign\FilamentGaze\Forms\Components;
 
 use Carbon\Carbon;
+use Closure;
+use Filament\Actions\Contracts\HasLivewire;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Component;
+use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Cache;
+use Livewire\Livewire;
 
 /**
  * Class GazeBanner
@@ -19,29 +23,45 @@ class GazeBanner extends Component
 {
     /**
      * The array of current viewers.
-     *
-     * @var array
      */
     public array $currentViewers = [];
 
     /**
      * The custom identifier for the GazeBanner component.
-     *
-     * @var string|null
      */
     public ?string $identifier = null;
 
     /**
      * The poll timer for refreshing the list of viewers.
-     *
-     * @var string|int
      */
-    public string | int $pollTimer = 30;
+    public string | int $pollTimer = 10;
+
+    /**
+     * Whether the lockable trait has been enabled.
+     */
+    public bool $isLockable = false;
+
+    /**
+     * Whether the lockable trait has been enabled.
+     */
+    public bool $canTakeControl = false;
+
+
+    /**
+     * Create a new instance of the GazeBanner component.
+     */
+    public static function make(array | Closure $schema = []): static
+    {
+        $static = app(static::class, ['schema' => $schema]);
+        $static->configure();
+
+        return $static;
+    }
 
     /**
      * Set a custom identifier for the GazeBanner component.
      *
-     * @param string $identifier
+     * @param  string  $identifier
      * @return $this
      */
     public function identifier($identifier)
@@ -54,7 +74,7 @@ class GazeBanner extends Component
     /**
      * Set the poll timer for refreshing the list of viewers.
      *
-     * @param int $poll
+     * @param  int  $poll
      * @return $this
      */
     public function pollTimer($poll)
@@ -62,6 +82,69 @@ class GazeBanner extends Component
         $this->pollTimer = $poll;
 
         return $this;
+    }
+
+    /**
+     * Set the lock state
+     */
+    public function lock($state = true): static
+    {
+        $this->isLockable = $state;
+
+        if ($state) {
+            $this->registerListeners([
+                'FilamentGaze::takeControl' => [
+                    function() {
+                        // Very hacky, maybe a better solution for this?
+                        $this->getLivewire()->mount($this->getLivewire()->getForm('form')->getRecord()?->id);
+                        $this->takeControl();
+                    },
+                ],
+            ]);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Set the take control state
+     */
+    public function canTakeControl(bool | Closure $fnc = true): static
+    {
+        $this->canTakeControl = (bool) $this->evaluate($fnc);
+
+        return $this;
+    }
+
+    public function takeControl()
+    {
+        // Set everyone but self to false
+        $identifier = $this->getIdentifier();
+        $curViewers = Cache::get('filament-gaze-' . $identifier, []);
+
+        foreach ($curViewers as $key => $viewer) {
+            $curViewers[$key]['has_control'] = false;
+
+            if ($viewer['id'] == auth()->id()) {
+                $curViewers[$key]['has_control'] = true;
+            }
+        }
+
+        Cache::put('filament-gaze-' . $identifier, $curViewers, now()->addSeconds($this->pollTimer * 2));
+    }
+
+    public function getIdentifier()
+    {
+        if (!$this->identifier) {
+            $record = $this->getRecord();
+            if (! $record) {
+                $this->identifier = (string) $this->getModel();
+            } else {
+                $this->identifier = get_class($record) . '-' . $record->id;
+            }
+        }
+
+        return $this->identifier;
     }
 
     /**
@@ -74,21 +157,22 @@ class GazeBanner extends Component
      */
     public function refreshViewers()
     {
-        if (! $this->identifier) {
-            $record = $this->getRecord();
-            if (! $record) {
-                $this->identifier = (string)$this->getModel();
-            } else {
-                $this->identifier = get_class($record) . '-' . $record->id;
-            }
-        }
+        $this->registerListeners([
+            'FilamentGaze::takeControl' => [
+                function() {
+                    $this->refreshViewers();
+                },
+            ],
+        ]);
 
-        $identifier = $this->identifier;
+        $identifier = $this->getIdentifier();
         $authGuard = Filament::getCurrentPanel()->getAuthGuard();
-        
+
         // Todo: refactor this
         $guardProvider = config('auth.guards.' . $authGuard . '.provider');
         $guardModel = config('auth.providers.' . $guardProvider . '.model');
+
+        $lockState = false;
 
         // Check over all current viewers
         $curViewers = Cache::get('filament-gaze-' . $identifier, []);
@@ -103,6 +187,9 @@ class GazeBanner extends Component
 
             // If current user, remove them so they can be re-added below.
             if (! $model || ($model?->id == auth()?->id())) {
+
+                $lockState = $viewer['has_control'];
+
                 unset($curViewers[$key]);
             }
         }
@@ -113,6 +200,7 @@ class GazeBanner extends Component
             'id' => auth()->guard($authGuard)->id(),
             'name' => $user?->name ?? $user?->getFilamentName() ?? 'Unknown', // Possibly need to account for more?
             'expires' => now()->addSeconds($this->pollTimer * 2),
+            'has_control' => $this->isLockable && ($lockState || (count($curViewers) === 0)),
         ];
 
         $this->currentViewers = $curViewers;
@@ -124,8 +212,6 @@ class GazeBanner extends Component
      * Render the GazeBanner component.
      *
      * It refreshes the list of viewers, formats the viewer names, and returns the rendered view.
-     *
-     * @return \Illuminate\Contracts\View\View
      */
     public function render(): \Illuminate\Contracts\View\View
     {
@@ -159,25 +245,22 @@ class GazeBanner extends Component
             ]);
         }
 
+        $lockUser = collect($this->currentViewers)->where('has_control', true)->first();
+        $hasControl = isset($lockUser) && $lockUser['id'] == auth()->id();
+
+        if ($this->isLockable) {
+            $this->getLivewire()->getForm('form')->disabled(!$hasControl);
+        }
+
         return view('filament-gaze::forms.components.gaze-banner', [
             'show' => $filteredViewers->count() >= 1,
             'currentViewers' => $this->currentViewers,
             'text' => $finalText,
             'pollTimer' => $this->pollTimer,
+            'isLockable' => $this->isLockable,
+            'controlUser' => $lockUser ?? false,
+            'hasControl' => $hasControl,
+            'canTakeControl' => $this->canTakeControl,
         ]);
-    }
-
-    /**
-     * Create a new instance of the GazeBanner component.
-     *
-     * @param array|\Closure $schema
-     * @return static
-     */
-    public static function make(array | Closure $schema = []): static
-    {
-        $static = app(static::class, ['schema' => $schema]);
-        $static->configure();
-
-        return $static;
     }
 }
