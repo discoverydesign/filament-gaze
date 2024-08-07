@@ -117,7 +117,7 @@ class GazeBanner extends Component
     public function takeControl()
     {
         // Set everyone but self to false
-        $identifier = $this->identifier;
+        $identifier = $this->getIdentifier();
         $curViewers = Cache::get('filament-gaze-' . $identifier, []);
 
         foreach ($curViewers as $key => $viewer) {
@@ -129,6 +129,20 @@ class GazeBanner extends Component
         }
 
         Cache::put('filament-gaze-' . $identifier, $curViewers, now()->addSeconds($this->pollTimer * 2));
+    }
+
+    public function getIdentifier()
+    {
+        if (!$this->identifier) {
+            $record = $this->getRecord();
+            if (! $record) {
+                $this->identifier = (string) $this->getModel();
+            } else {
+                $this->identifier = get_class($record) . '-' . $record->id;
+            }
+        }
+
+        return $this->identifier;
     }
 
     /**
@@ -149,16 +163,7 @@ class GazeBanner extends Component
             ],
         ]);
 
-        if (! $this->identifier) {
-            $record = $this->getRecord();
-            if (! $record) {
-                $this->identifier = (string) $this->getModel();
-            } else {
-                $this->identifier = get_class($record) . '-' . $record->id;
-            }
-        }
-
-        $identifier = $this->identifier;
+        $identifier = $this->getIdentifier();
         $authGuard = Filament::getCurrentPanel()->getAuthGuard();
 
         // Todo: refactor this
