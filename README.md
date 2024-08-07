@@ -97,21 +97,21 @@ GazeBanner::make()
 #### Arguments
 `timeInSeconds` - (int) The amount of time in seconds between each poll. Default is 30 seconds.
 
-### `->identifier($name)`
+### `->identifier($fnc)`
 
 #### Description
 `identifier` is used as a unique identifier for this gaze banner. Any other gaze banners with the same identifier will share the same list of active users. This can be useful if you want 2 or more difference resources to share the same list of active viewing users.
 
 #### Arguments
-`name` - (string) The name of the identifier. Default is the resource's model class combines with model Id.
+`fnc` - (optional, closure | string) The name of the identifier. Default is the resource's model class combines with model Id.
 
-### `->lock($state)`
+### `->lock($fnc)`
 
 #### Description
 `lock` can be used to lock the resource for anyone but the current person editing the form. This can be useful if you want to prevent multiple people from editing the same resource at the same time. The controller is the first person to access the resource, or the person who has taken control of the resource. If you enable this after accessing a resource, you may need to run `php artisan cache:clear` as it is possible that the current cached viewers don't have a marked controller.
 
 #### Arguments
-`state` - (optional, bool) If the resource is lockable or not.
+`fnc` - (optional, closure | bool) If the resource is lockable or not.
 
 ### `->canTakeControl($fnc)`
 

@@ -4,12 +4,9 @@ namespace DiscoveryDesign\FilamentGaze\Forms\Components;
 
 use Carbon\Carbon;
 use Closure;
-use Filament\Actions\Contracts\HasLivewire;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Component;
-use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Cache;
-use Livewire\Livewire;
 
 /**
  * Class GazeBanner
@@ -46,7 +43,6 @@ class GazeBanner extends Component
      */
     public bool $canTakeControl = false;
 
-
     /**
      * Create a new instance of the GazeBanner component.
      */
@@ -64,9 +60,9 @@ class GazeBanner extends Component
      * @param  string  $identifier
      * @return $this
      */
-    public function identifier($identifier)
+    public function identifier(string | Closure $fnc = true): static
     {
-        $this->identifier = $identifier;
+        $this->identifier = (string) $this->evaluate($fnc);
 
         return $this;
     }
@@ -87,14 +83,14 @@ class GazeBanner extends Component
     /**
      * Set the lock state
      */
-    public function lock($state = true): static
+    public function lock(bool | Closure $fnc = true): static
     {
-        $this->isLockable = $state;
+        $this->isLockable = (bool) $this->evaluate($fnc);
 
-        if ($state) {
+        if ($this->isLockable) {
             $this->registerListeners([
                 'FilamentGaze::takeControl' => [
-                    function() {
+                    function () {
                         // Very hacky, maybe a better solution for this?
                         $this->getLivewire()->mount($this->getLivewire()->getForm('form')->getRecord()?->id);
                         $this->takeControl();
@@ -135,7 +131,7 @@ class GazeBanner extends Component
 
     public function getIdentifier()
     {
-        if (!$this->identifier) {
+        if (! $this->identifier) {
             $record = $this->getRecord();
             if (! $record) {
                 $this->identifier = (string) $this->getModel();
@@ -159,7 +155,7 @@ class GazeBanner extends Component
     {
         $this->registerListeners([
             'FilamentGaze::takeControl' => [
-                function() {
+                function () {
                     $this->refreshViewers();
                 },
             ],
@@ -249,7 +245,7 @@ class GazeBanner extends Component
         $hasControl = isset($lockUser) && $lockUser['id'] == auth()->id();
 
         if ($this->isLockable) {
-            $this->getLivewire()->getForm('form')->disabled(!$hasControl);
+            $this->getLivewire()->getForm('form')->disabled(! $hasControl);
         }
 
         return view('filament-gaze::forms.components.gaze-banner', [
