@@ -60,7 +60,7 @@ class GazeBanner extends Component
      * @param  string  $identifier
      * @return $this
      */
-    public function identifier(string | Closure $fnc = true): static
+    public function identifier(string | Closure $fnc = ''): static
     {
         $this->identifier = (string) $this->evaluate($fnc);
 
