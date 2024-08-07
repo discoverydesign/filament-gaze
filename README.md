@@ -108,7 +108,7 @@ GazeBanner::make()
 ### `->lock($state)`
 
 #### Description
-`lock` can be used to lock the resource for anyone but the current person editing the form. This can be useful if you want to prevent multiple people from editing the same resource at the same time. The controller is the first person to access the resource, or the person who has taken control of the resource.
+`lock` can be used to lock the resource for anyone but the current person editing the form. This can be useful if you want to prevent multiple people from editing the same resource at the same time. The controller is the first person to access the resource, or the person who has taken control of the resource. If you enable this after accessing a resource, you may need to run `php artisan cache:clear` as it is possible that the current cached viewers don't have a marked controller.
 
 #### Arguments
 `state` - (optional, bool) If the resource is lockable or not.
