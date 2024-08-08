@@ -92,7 +92,7 @@ GazeBanner::make()
 ### `->pollTimer($timeInSecs)`
 
 #### Description
-`polltimer` can be used to set how often the browser should inform Filament that the use is still viewing the page, along with getting an updated list of other users also viewing. It is advised not to put this value too short, as it can cause rate limiting issues. But also not to have this value too long, as it will result in a delayed update of new users viewing the page.
+`polltimer` can be used to set how often the browser should inform Filament that the user is still viewing the page, along with getting an updated list of other users also viewing. It is advised not to put this value too short, as it can cause rate limiting issues. But also not to have this value too long, as it will result in a delayed update of new users viewing the page.
 
 #### Arguments
 `timeInSeconds` - (int) The amount of time in seconds between each poll. Default is 30 seconds.
@@ -108,7 +108,7 @@ GazeBanner::make()
 ### `->lock($fnc)`
 
 #### Description
-`lock` can be used to lock the resource for anyone but the current person editing the form. This can be useful if you want to prevent multiple people from editing the same resource at the same time. The controller is the first person to access the resource, or the person who has taken control of the resource. If you enable this after accessing a resource, you may need to run `php artisan cache:clear` as it is possible that the current cached viewers don't have a marked controller.
+`lock` can be used to lock the resource for anyone but the current person editing the form. This can be useful if you want to prevent multiple people from editing the same resource at the same time. The designated controller is the first person to access the resource, or the person who has taken control of the resource. If you enable this after recently accessing a resource, you may need to run `php artisan cache:clear` as it is possible that the current cached viewers don't have a marked controller (This is only an issue for development).
 
 #### Arguments
 `fnc` - (optional, closure | bool) If the resource is lockable or not.
