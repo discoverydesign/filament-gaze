@@ -13,6 +13,11 @@ This package allows you to display when other users are viewing the same resourc
 
 https://packagist.org/packages/discoverydesign/filament-gaze
 
+## Features
+- Ability to see who else is currently viewing a resource.
+- Ability to lock a resource to only 1 editor at a time.
+- Ability to conditionally allow users to take control of a locked resource.
+
 ## How to use
 1. Install the package using `composer require discoverydesign/filament-gaze`
 2. Add `\DiscoveryDesign\FilamentGaze\FilamentGazePlugin::make()` to your Filament Panel provider. 
