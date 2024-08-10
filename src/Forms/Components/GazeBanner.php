@@ -91,8 +91,7 @@ class GazeBanner extends Component
             $this->registerListeners([
                 'FilamentGaze::takeControl' => [
                     function () {
-                        // Very hacky, maybe a better solution for this?
-                        $this->getLivewire()->mount($this->getLivewire()->getForm('form')->getRecord()?->id);
+                        $this->refreshForm();
                         $this->takeControl();
                     },
                 ],
@@ -141,6 +140,12 @@ class GazeBanner extends Component
         }
 
         return $this->identifier;
+    }
+
+    public function refreshForm()
+    {
+        // Very hacky, maybe a better solution for this?
+        $this->getLivewire()->mount($this->getLivewire()->getForm('form')->getRecord()?->id);
     }
 
     /**
