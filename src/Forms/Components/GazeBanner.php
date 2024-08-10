@@ -91,8 +91,7 @@ class GazeBanner extends Component
             $this->registerListeners([
                 'FilamentGaze::takeControl' => [
                     function () {
-                        // Very hacky, maybe a better solution for this?
-                        $this->getLivewire()->mount($this->getLivewire()->getForm('form')->getRecord()?->id);
+                        $this->refreshForm();
                         $this->takeControl();
                     },
                 ],
@@ -118,11 +117,12 @@ class GazeBanner extends Component
         $identifier = $this->getIdentifier();
         $curViewers = Cache::get('filament-gaze-' . $identifier, []);
 
+        $authGuard = Filament::getCurrentPanel()->getAuthGuard();
         foreach ($curViewers as $key => $viewer) {
-            $curViewers[$key]['has_control'] = false;
-
-            if ($viewer['id'] == auth()->id()) {
+            if ($viewer['id'] == auth()->guard($authGuard)->id()) {
                 $curViewers[$key]['has_control'] = true;
+            } else {
+                $curViewers[$key]['has_control'] = false;
             }
         }
 
@@ -141,6 +141,12 @@ class GazeBanner extends Component
         }
 
         return $this->identifier;
+    }
+
+    public function refreshForm()
+    {
+        // Very hacky, maybe a better solution for this?
+        $this->getLivewire()->mount($this->getLivewire()->getForm('form')->getRecord()?->id);
     }
 
     /**
@@ -168,6 +174,7 @@ class GazeBanner extends Component
         $guardProvider = config('auth.guards.' . $authGuard . '.provider');
         $guardModel = config('auth.providers.' . $guardProvider . '.model');
 
+        $someoneHasLockState = false;
         $lockState = false;
 
         // Check over all current viewers
@@ -176,17 +183,29 @@ class GazeBanner extends Component
             $model = $guardModel::find($viewer['id']);
             $expires = Carbon::parse($viewer['expires']);
 
+            if (! $model) {
+                unset($curViewers[$key]);
+
+                continue;
+            }
+
             // Remove expired viewers
             if ($expires->isPast()) {
                 unset($curViewers[$key]);
+
+                continue;
             }
 
             // If current user, remove them so they can be re-added below.
-            if (! $model || ($model?->id == auth()?->id())) {
-
+            if ($viewer['id'] == auth()->guard($authGuard)?->id()) {
+                // Preserve their active lock state
                 $lockState = $viewer['has_control'];
 
                 unset($curViewers[$key]);
+            }
+
+            if ($viewer['has_control']) {
+                $someoneHasLockState = true;
             }
         }
 
@@ -198,6 +217,21 @@ class GazeBanner extends Component
             'expires' => now()->addSeconds($this->pollTimer * 2),
             'has_control' => $this->isLockable && ($lockState || (count($curViewers) === 0)),
         ];
+
+        // If no one has lock state, give it to the first person.
+        // Annoyingly the table isn't sorted so we can't just grab the first person.
+        if ($this->isLockable && ! $someoneHasLockState) {
+            foreach ($curViewers as $key => $viewer) {
+                $curViewers[$key]['has_control'] = true;
+
+                // Refresh the form is it's the current user being given control.
+                if ($viewer['id'] == auth()->guard($authGuard)->id()) {
+                    $this->refreshForm();
+                }
+
+                break;
+            }
+        }
 
         $this->currentViewers = $curViewers;
 
@@ -215,8 +249,9 @@ class GazeBanner extends Component
 
         $formattedViewers = '';
         $currentViewers = collect($this->currentViewers);
-        $filteredViewers = $currentViewers->filter(function ($viewer) {
-            return $viewer['id'] != auth()->id();
+        $authGuard = Filament::getCurrentPanel()->getAuthGuard();
+        $filteredViewers = $currentViewers->filter(function ($viewer) use ($authGuard) {
+            return $viewer['id'] != auth()->guard($authGuard)->id();
         });
 
         $finalText = '';
@@ -242,7 +277,7 @@ class GazeBanner extends Component
         }
 
         $lockUser = collect($this->currentViewers)->where('has_control', true)->first();
-        $hasControl = isset($lockUser) && $lockUser['id'] == auth()->id();
+        $hasControl = isset($lockUser) && $lockUser['id'] == auth()->guard($authGuard)->id();
 
         if ($this->isLockable) {
             $this->getLivewire()->getForm('form')->disabled(! $hasControl);
