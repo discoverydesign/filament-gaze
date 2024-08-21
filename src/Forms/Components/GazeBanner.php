@@ -101,6 +101,17 @@ class GazeBanner extends Component
         return $this;
     }
 
+    /*
+     *  Helper function to hide on create
+     */
+
+    public function hideOnCreate(): static
+    {
+        $this->hidden(fn ($record) => $record === null);
+
+        return $this;
+    }
+
     /**
      * Set the take control state
      */
