@@ -90,6 +90,11 @@ GazeBanner::make()
 GazeBanner::make()
     ->hidden(fn (?Order $record) => $record === null),
 ```
+There is also a helper function
+```php
+GazeBanner::make()
+    ->hideOnCreate(),
+```
 
 
 ## Docs
@@ -125,6 +130,11 @@ GazeBanner::make()
 
 #### Arguments
 `fnc` - (optional, closure | bool) If the user can take control of the resource. Default is true. If a closure is passed, it should return a bool.
+
+### `->hideOnCreate()`
+
+#### Description
+`hideOnCreate` is a helper function that can be used to hide the banner on create forms.
 
 
 ## Author
