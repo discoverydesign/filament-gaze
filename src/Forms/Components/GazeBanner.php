@@ -181,27 +181,21 @@ class GazeBanner extends Component
         $identifier = $this->getIdentifier();
         $authGuard = Filament::getCurrentPanel()->getAuthGuard();
 
-        // Todo: refactor this
-        $guardProvider = config('auth.guards.' . $authGuard . '.provider');
-        $guardModel = config('auth.providers.' . $guardProvider . '.model');
-
         $someoneHasLockState = false;
         $lockState = false;
 
         // Check over all current viewers
         $curViewers = Cache::get('filament-gaze-' . $identifier, []);
         foreach ($curViewers as $key => $viewer) {
-            $model = $guardModel::find($viewer['id']);
-            $expires = Carbon::parse($viewer['expires']);
 
-            if (! $model) {
+            if (isset($viewer['guard']) && $authGuard !== $viewer['guard']) {
                 unset($curViewers[$key]);
 
                 continue;
             }
 
             // Remove expired viewers
-            if ($expires->isPast()) {
+            if (Carbon::parse($viewer['expires'])->isPast()) {
                 unset($curViewers[$key]);
 
                 continue;
@@ -224,6 +218,7 @@ class GazeBanner extends Component
         // Add/re-add the current user to the list
         $curViewers[] = [
             'id' => auth()->guard($authGuard)->id(),
+            'guard' => $authGuard,
             'name' => $user?->name ?? $user?->getFilamentName() ?? 'Unknown', // Possibly need to account for more?
             'expires' => now()->addSeconds($this->pollTimer * 2),
             'has_control' => $this->isLockable && ($lockState || (count($curViewers) === 0)),
