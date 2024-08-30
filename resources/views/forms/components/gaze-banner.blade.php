@@ -1,7 +1,7 @@
 <div
     class="gaze-banner @if($show) gaze-banner--has-content @endif"
     x-data="{}"
-    wire:poll.{{ $pollTimer }}s="dispatchFormEvent('FilamentGaze::refreshViewers')"
+    wire:poll.keep-alive.{{ $pollTimer }}s="dispatchFormEvent('FilamentGaze::refreshViewers')"
 >
     @if($show)
         <div>
