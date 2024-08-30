@@ -157,7 +157,11 @@ class GazeBanner extends Component
     public function refreshForm()
     {
         // Very hacky, maybe a better solution for this?
-        $this->getLivewire()->mount($this->getRecord()?->id);
+	    $record = $this->getRecord();
+
+	    if ($record) {
+            $this->getLivewire()->mount($record->{$record->getRouteKeyName()});
+	    } 
     }
 
     /**
