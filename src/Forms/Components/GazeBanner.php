@@ -161,7 +161,7 @@ class GazeBanner extends Component
 
 	    if ($record) {
             $this->getLivewire()->mount($record->{$record->getRouteKeyName()});
-	    } 
+	    }
     }
 
     /**
@@ -290,7 +290,12 @@ class GazeBanner extends Component
         $hasControl = isset($lockUser) && $lockUser['id'] == auth()->guard($authGuard)->id();
 
         if ($this->isLockable) {
-            $this->getLivewire()->getForm('form')->disabled(! $hasControl);
+            if($form = $this->getLivewire()->getForm('form')){
+                $form->disabled(! $hasControl);
+            }
+            if($childForm = $this->getLivewire()->getForm('mountedTableActionForm')){
+                $childForm->disabled(! $hasControl);
+            }
         }
 
         return view('filament-gaze::forms.components.gaze-banner', [
