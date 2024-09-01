@@ -9,7 +9,7 @@
 
 ## Demo
 
-https://github.com/user-attachments/assets/919e72cc-1904-4f08-afe0-74a4db9198c6
+[![Gaze Demo Video](https://github.com/user-attachments/assets/6839eaa7-25e5-4b4a-8272-44e24123a270)](https://www.loom.com/share/eb45fbb9088145888c066bb2d2303457?sid=64fdd7d4-0e53-4a01-a417-d73d1acf2439)
 
 This package allows you to display when other users are viewing the same resource in Filament PHP.
 
