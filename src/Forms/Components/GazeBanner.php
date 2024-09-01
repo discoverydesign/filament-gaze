@@ -137,7 +137,8 @@ class GazeBanner extends Component
             }
         }
 
-        Cache::put('filament-gaze-' . $identifier, $curViewers, now()->addSeconds($this->pollTimer * 2));
+        Cache::put('filament-gaze-' . $identifier, $curViewers, now()->addSeconds(max([5, $this->pollTimer * 2])));
+
     }
 
     public function getIdentifier()
@@ -224,7 +225,7 @@ class GazeBanner extends Component
             'id' => auth()->guard($authGuard)->id(),
             'guard' => $authGuard,
             'name' => $user?->name ?? $user?->getFilamentName() ?? 'Unknown', // Possibly need to account for more?
-            'expires' => now()->addSeconds($this->pollTimer * 2),
+            'expires' => now()->addSeconds(max([5, $this->pollTimer * 2])),
             'has_control' => $this->isLockable && ($lockState || (count($curViewers) === 0)),
         ];
 
