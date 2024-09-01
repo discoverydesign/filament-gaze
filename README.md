@@ -3,11 +3,13 @@
 👀 See who's viewing a resource in Filament PHP 🔭
 
 ![Marketing Banner](https://raw.githubusercontent.com/discoverydesign/filament-gaze/main/media/1.jpg)
-![Basic Example](https://raw.githubusercontent.com/discoverydesign/filament-gaze/main/media/3.jpg)
-![Control Example](https://raw.githubusercontent.com/discoverydesign/filament-gaze/main/media/2.jpg)
 
 ![Packagist Version](https://img.shields.io/packagist/v/discoverydesign/filament-gaze.svg)
 ![Total Downloads](https://img.shields.io/packagist/dt/discoverydesign/filament-gaze.svg)
+
+## Demo
+
+https://github.com/user-attachments/assets/919e72cc-1904-4f08-afe0-74a4db9198c6
 
 This package allows you to display when other users are viewing the same resource in Filament PHP.
 
