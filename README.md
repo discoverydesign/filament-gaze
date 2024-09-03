@@ -138,6 +138,14 @@ GazeBanner::make()
 #### Description
 `hideOnCreate` is a helper function that can be used to hide the banner on create forms.
 
+## Customization
+
+### Change icons
+
+To [customize the icons](https://filamentphp.com/docs/3.x/support/icons#replacing-the-default-icons) in the banner, you may use the following aliases:
+
+- `filament-gaze::banner.locked` for the lock icon
+- `filament-gaze::banner.view` for the eye icon
 
 ## Author
 
