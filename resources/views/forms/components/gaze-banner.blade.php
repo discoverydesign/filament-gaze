@@ -9,13 +9,13 @@
                 <div class="flex flex-col justify-center">
                     @if($isLockable && !$hasControl)
                         <x-filament::icon
-                            alias="panels::filament-gaze.banner.icon"
+                            alias="filament-gaze::banner.locked"
                             icon="heroicon-m-lock-closed"
                             class="h-5 w-5 my-auto"
                         />
                     @else
                         <x-filament::icon
-                            alias="panels::filament-gaze.banner.icon"
+                            alias="filament-gaze::banner.view"
                             icon="heroicon-m-eye"
                             class="h-5 w-5 my-auto"
                         />
