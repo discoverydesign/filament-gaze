@@ -26,6 +26,7 @@ trait GazeLockControl {
                 $this->identifier = get_class($record) . '-' . $record->id;
             }
         }
+        // Ensure there's not a custom identifier set.
         $customIdentifier = Cache::get('filament-gaze-' . $this->identifier . '-custom-identfier');
         if($customIdentifier) {
             $this->identifier = $customIdentifier;
@@ -33,14 +34,15 @@ trait GazeLockControl {
         return $this->identifier;
     }
 
-    public function setControllingUser(string|int $userId): void
-    {
-        Cache::put('filament-gaze-controller-' .$this->getIdentifier(), $userId,now()->addSeconds(max([5, $this->pollTimer * 2])));
-
-    }
-
+    /**
+     * See if current user has gaze control access.
+     * @return bool
+     */
     public function hasGazeControl(): bool
     {
+        if(!isset(request()->user()?->id)){
+            return false;
+        }
         $currentViewers = Cache::get('filament-gaze-' . $this->getIdentifier());
         if( is_null($currentViewers) ) {
             return false;

@@ -4,10 +4,10 @@ namespace DiscoveryDesign\FilamentGaze\Forms\Components;
 
 use Carbon\Carbon;
 use Closure;
-use DiscoveryDesign\FilamentGaze\Traits\GazeLockControl;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Component;
 use Illuminate\Support\Facades\Cache;
+use DiscoveryDesign\FilamentGaze\Traits\GazeLockControl;
 
 /**
  * Class GazeBanner
