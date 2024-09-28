@@ -44,8 +44,9 @@ trait GazeLockControl {
             return false;
         }
         $currentViewers = Cache::get('filament-gaze-' . $this->getIdentifier());
+
         if( is_null($currentViewers) ) {
-            return false;
+            return true;
         }
         foreach ($currentViewers as $viewer) {
             if($viewer['id'] === request()->user()->id && $viewer['has_control']) {
