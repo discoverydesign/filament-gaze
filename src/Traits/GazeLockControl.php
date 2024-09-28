@@ -2,8 +2,9 @@
 
 namespace DiscoveryDesign\FilamentGaze\Traits;
 
-
 use Illuminate\Support\Facades\Cache;
+
+
 /**
  * Trait GazeLockControl
  *
