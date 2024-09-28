@@ -97,7 +97,31 @@ There is also a helper function
 GazeBanner::make()
     ->hideOnCreate(),
 ```
+### Hide actions based on the controlling user (if you've implemented the take control logic)
 
+You will need to use the `DiscoveryDesign\FilamentGaze\Traits\GazeLockControl` trait, in order to access the method.
+```php
+namespace App\Filament\Resources\CustomerResource\Pages;
+
+use App\Filament\Resources\CustomerResource;
+use DiscoveryDesign\FilamentGaze\Traits\GazeLockControl;
+use Filament\Actions;
+use Filament\Resources\Pages\EditRecord;
+
+class EditCustomer extends EditRecord
+{
+    use GazeLockControl;
+
+    protected static string $resource = CustomerResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\DeleteAction::make()->hidden(!$this->hasGazeControl()),
+        ];
+    }
+
+```
 
 ## Docs
 
@@ -137,6 +161,12 @@ GazeBanner::make()
 
 #### Description
 `hideOnCreate` is a helper function that can be used to hide the banner on create forms.
+
+### `->hasGazeControl()`
+
+#### Description
+`hasGazeControl` is a helper function that can be used to hide actions, and is usable from the GazeLockControl trait.
+
 
 ## Customization
 
