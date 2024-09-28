@@ -35,11 +35,11 @@ trait GazeLockControl {
 
     public function setControllingUser(string|int $userId): void
     {
-        Cache::put('filament-gaze-controller-' .$this->getIdentifier(), $userId);
+        Cache::put('filament-gaze-controller-' .$this->getIdentifier(), $userId,now()->addSeconds(max([5, $this->pollTimer * 2])));
 
     }
 
-    public function hasControl(): bool
+    public function hasGazeControl(): bool
     {
         $currentViewers = Cache::get('filament-gaze-' . $this->getIdentifier());
         if( is_null($currentViewers) ) {
