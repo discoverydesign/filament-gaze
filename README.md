@@ -98,6 +98,8 @@ GazeBanner::make()
     ->hideOnCreate(),
 ```
 ### Hide actions based on the controlling user (if you've implemented the take control logic)
+
+You will need to use the `DiscoveryDesign\FilamentGaze\Traits\GazeLockControl` trait, in order to access the method.
 ```php
 namespace App\Filament\Resources\CustomerResource\Pages;
 
@@ -163,7 +165,7 @@ class EditCustomer extends EditRecord
 ### `->hasGazeControl()`
 
 #### Description
-`hasGazeControl` is a helper function that can be used to hide actions, and is usable from the GazeLocKControl trait.
+`hasGazeControl` is a helper function that can be used to hide actions, and is usable from the GazeLockControl trait.
 
 
 ## Customization
