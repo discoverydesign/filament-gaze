@@ -143,7 +143,7 @@ class GazeBanner extends Component
 
     }
 
-    public function refreshForm()
+    public function refreshForm(): void
     {
         // Very hacky, maybe a better solution for this?
 	    $record = $this->getRecord();
@@ -161,7 +161,7 @@ class GazeBanner extends Component
      *
      * @return void
      */
-    public function refreshViewers()
+    public function refreshViewers(): void
     {
         $this->registerListeners([
             'FilamentGaze::takeControl' => [
