@@ -15,6 +15,10 @@ This package allows you to display when other users are viewing the same resourc
 
 https://packagist.org/packages/discoverydesign/filament-gaze
 
+```
+composer require discoverydesign/filament-gaze
+```
+
 ## Features
 - Ability to see who else is currently viewing a resource.
 - Ability to lock a resource to only 1 editor at a time.
