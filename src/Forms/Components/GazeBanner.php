@@ -7,6 +7,7 @@ use Closure;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Component;
 use Illuminate\Support\Facades\Cache;
+use DiscoveryDesign\FilamentGaze\Traits\GazeLockControl;
 
 /**
  * Class GazeBanner
@@ -18,6 +19,7 @@ use Illuminate\Support\Facades\Cache;
  */
 class GazeBanner extends Component
 {
+    use GazeLockControl;
     /**
      * The array of current viewers.
      */
@@ -63,7 +65,7 @@ class GazeBanner extends Component
     public function identifier(string | Closure $fnc = ''): static
     {
         $this->identifier = (string) $this->evaluate($fnc);
-
+        Cache::put('filament-gaze-' . $this->getIdentifier() . '-custom-identfier',$this->identifier);
         return $this;
     }
 
@@ -141,21 +143,7 @@ class GazeBanner extends Component
 
     }
 
-    public function getIdentifier()
-    {
-        if (! $this->identifier) {
-            $record = $this->getRecord();
-            if (! $record) {
-                $this->identifier = (string) $this->getModel();
-            } else {
-                $this->identifier = get_class($record) . '-' . $record->id;
-            }
-        }
-
-        return $this->identifier;
-    }
-
-    public function refreshForm()
+    public function refreshForm(): void
     {
         // Very hacky, maybe a better solution for this?
 	    $record = $this->getRecord();
@@ -173,7 +161,7 @@ class GazeBanner extends Component
      *
      * @return void
      */
-    public function refreshViewers()
+    public function refreshViewers(): void
     {
         $this->registerListeners([
             'FilamentGaze::takeControl' => [
