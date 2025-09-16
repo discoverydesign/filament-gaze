@@ -7,6 +7,8 @@
 ![Packagist Version](https://img.shields.io/packagist/v/discoverydesign/filament-gaze.svg)
 ![Total Downloads](https://img.shields.io/packagist/dt/discoverydesign/filament-gaze.svg)
 
+**Now supporting FilamentPHP 4**
+
 ## Demo
 
 [![Gaze Demo Video](https://github.com/user-attachments/assets/6839eaa7-25e5-4b4a-8272-44e24123a270)](https://www.loom.com/share/eb45fbb9088145888c066bb2d2303457?sid=64fdd7d4-0e53-4a01-a417-d73d1acf2439)
