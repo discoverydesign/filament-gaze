@@ -5,7 +5,7 @@ namespace DiscoveryDesign\FilamentGaze\Forms\Components;
 use Carbon\Carbon;
 use Closure;
 use Filament\Facades\Filament;
-use Filament\Forms\Components\Component;
+use Filament\Schemas\Components\Component;
 use Illuminate\Support\Facades\Cache;
 
 /**
@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Cache;
  */
 class GazeBanner extends Component
 {
+    use Concerns\ListensToEvents;
     /**
      * The array of current viewers.
      */
@@ -46,14 +47,19 @@ class GazeBanner extends Component
     /**
      * Create a new instance of the GazeBanner component.
      */
-    public static function make(array | Closure $schema = []): static
+    public static function make(): static
     {
-        $static = app(static::class, ['schema' => $schema]);
+        $static = app(static::class);
         $static->configure();
 
         return $static;
     }
 
+    /**
+     * Configure the GazeBanner component.
+     *
+     * This method sets the component's view and initializes the current viewers.
+     */
     /**
      * Set a custom identifier for the GazeBanner component.
      *
@@ -161,7 +167,7 @@ class GazeBanner extends Component
 	    $record = $this->getRecord();
 
 	    if ($record) {
-            $this->getLivewire()->mount($record->{$record->getRouteKeyName()});
+                $this->getLivewire()->mount($record->{$record->getRouteKeyName()});
 	    }
     }
 
@@ -175,14 +181,6 @@ class GazeBanner extends Component
      */
     public function refreshViewers()
     {
-        $this->registerListeners([
-            'FilamentGaze::takeControl' => [
-                function () {
-                    $this->refreshViewers();
-                },
-            ],
-        ]);
-
         $identifier = $this->getIdentifier();
         $authGuard = Filament::getCurrentPanel()->getAuthGuard();
 
@@ -291,10 +289,10 @@ class GazeBanner extends Component
         $hasControl = isset($lockUser) && $lockUser['id'] == auth()->guard($authGuard)->id();
 
         if ($this->isLockable) {
-            if($form = $this->getLivewire()->getForm('form')){
+            if($form = $this->getLivewire()->getSchema('form')){
                 $form->disabled(! $hasControl);
             }
-            if($childForm = $this->getLivewire()->getForm('mountedTableActionForm')){
+            if($childForm = $this->getLivewire()->getSchema('mountedTableActionForm')){
                 $childForm->disabled(! $hasControl);
             }
         }

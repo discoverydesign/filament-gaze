@@ -1,0 +1,35 @@
+/* We use this to prevent the gap/space creating ghost elements */
+div:has(> .gaze-banner:not(.gaze-banner--has-content)) {
+    display: none;
+}
+
+.fi-gaze-banner {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    border: 1px solid var(--primary-500);
+    color: var(--primary-500);
+    background-color: var(--gray-100);
+}
+
+
+.fi.dark .fi-gaze-banner {
+    background-color: var(--color-gray-900);
+}
+
+.fi-gaze-banner .icon-container {
+    flex-shrink: 0;
+}
+
+.fi-gaze-banner .text-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.fi-gaze-banner .button-container {
+    flex-shrink: 0;
+}

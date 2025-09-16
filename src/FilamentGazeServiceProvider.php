@@ -42,7 +42,7 @@ class FilamentGazeServiceProvider extends PackageServiceProvider
      */
     public function packageBooted(): void {
         FilamentAsset::register([
-            Css::make('filament-gaze-stylesheet', __DIR__ . '/../dist/filament-gaze.css'),
+            Css::make('filament-gaze-stylesheet', __DIR__ . '/../resources/css/filament-gaze.css'),
         ]);
     }
 }
