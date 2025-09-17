@@ -6,7 +6,6 @@
 <div
     class="gaze-banner @if($show) gaze-banner--has-content @endif"
     x-data="{}"
-    wire:poll.keep-alive.{{ $pollTimer }}s="$dispatch('FilamentGaze::refreshViewers')"
 >
     @if($show)
         <div class="fi-gaze-banner">
