@@ -6,6 +6,7 @@
 <div
     class="gaze-banner @if($show) gaze-banner--has-content @endif"
     x-data="{}"
+
 >
     @if($show)
         <div class="fi-gaze-banner">
@@ -37,9 +38,7 @@
             </div>
 
             @if($isLockable && !$hasControl && $canTakeControl)
-                <x-filament::button class="button-container" color="primary" wire:click="$dispatch('FilamentGaze::takeControl')">
-                    {{ __('filament-gaze::gaze.lock_take_control') }}
-                </x-filament::button>
+                {{ $takeControlButton->button() }}
             @endif
         </div>
     @endif
