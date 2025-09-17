@@ -55,15 +55,10 @@ class GazeBanner extends Component
         $static = app(static::class);
         $static->configure();
 
-        $static->takeControlButton = Action::make('takeControl')
-            ->label(__('filament-gaze::gaze.lock_take_control') . ' 123')
-            ->color('primary')
-            ->action(function (GazeBanner $component) use ($static): void {
-                $static->takeControl();
-            });
-
         return $static;
     }
+
+    public function
 
     /**
      * Configure the GazeBanner component.

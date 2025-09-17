@@ -38,7 +38,9 @@
             </div>
 
             @if($isLockable && !$hasControl && $canTakeControl)
-                {{ $takeControlButton->button() }}
+                <x-filament::button class="button-container" color="primary" wire:click="dispatchFormEvent('FilamentGaze::takeControl')">
+                    {{ __('filament-gaze::gaze.lock_take_control') }}
+                </x-filament::button>
             @endif
         </div>
     @endif
