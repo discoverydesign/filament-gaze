@@ -82,6 +82,7 @@ class GazeBanner extends Component
     public function pollTimer($poll)
     {
         $this->pollTimer = $poll;
+        $this->poll($this->pollTimer);
 
         return $this;
     }
