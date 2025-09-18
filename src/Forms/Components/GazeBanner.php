@@ -4,9 +4,11 @@ namespace DiscoveryDesign\FilamentGaze\Forms\Components;
 
 use Carbon\Carbon;
 use Closure;
+use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Schemas\Components\Component;
 use Illuminate\Support\Facades\Cache;
+use Livewire\Attributes\On;
 
 /**
  * Class GazeBanner
@@ -18,7 +20,6 @@ use Illuminate\Support\Facades\Cache;
  */
 class GazeBanner extends Component
 {
-    use Concerns\ListensToEvents;
     /**
      * The array of current viewers.
      */
@@ -44,6 +45,8 @@ class GazeBanner extends Component
      */
     public bool $canTakeControl = false;
 
+    public $takeControlButton = null;
+
     /**
      * Create a new instance of the GazeBanner component.
      */
@@ -54,6 +57,8 @@ class GazeBanner extends Component
 
         return $static;
     }
+
+    public function
 
     /**
      * Configure the GazeBanner component.
@@ -95,14 +100,11 @@ class GazeBanner extends Component
         $this->isLockable = (bool) $this->evaluate($fnc);
 
         if ($this->isLockable) {
-            $this->registerListeners([
-                'FilamentGaze::takeControl' => [
-                    function () {
-                        $this->refreshForm();
-                        $this->takeControl();
-                    },
-                ],
-            ]);
+            // Only attempt to interact with Livewire once the container is initialized.
+            if (isset($this->container)) {
+                $this->refreshForm();
+                $this->takeControl();
+            }
         }
 
         return $this;
@@ -131,6 +133,12 @@ class GazeBanner extends Component
 
     public function takeControl()
     {
+        dd(1);
+
+        if (!isset($this->container)) {
+            return;
+        }
+
         // Set everyone but self to false
         $identifier = $this->getIdentifier();
         $curViewers = Cache::get('filament-gaze-' . $identifier, []);
@@ -164,12 +172,17 @@ class GazeBanner extends Component
 
     public function refreshForm()
     {
-        // Very hacky, maybe a better solution for this?
-	    $record = $this->getRecord();
+        // Avoid accessing the container before Filament initializes it.
+        if (! isset($this->container)) {
+            return;
+        }
 
-	    if ($record) {
-                $this->getLivewire()->mount($record->{$record->getRouteKeyName()});
-	    }
+        // Very hacky, maybe a better solution for this?
+        $record = $this->getRecord();
+
+        if ($record) {
+            $this->getLivewire()->mount($record->{$record->getRouteKeyName()});
+        }
     }
 
     /**
@@ -182,6 +195,10 @@ class GazeBanner extends Component
      */
     public function refreshViewers()
     {
+        if (! isset($this->container)) {
+            return;
+        }
+
         $identifier = $this->getIdentifier();
         $authGuard = Filament::getCurrentPanel()->getAuthGuard();
 
@@ -289,7 +306,7 @@ class GazeBanner extends Component
         $lockUser = collect($this->currentViewers)->where('has_control', true)->first();
         $hasControl = isset($lockUser) && $lockUser['id'] == auth()->guard($authGuard)->id();
 
-        if ($this->isLockable) {
+        if ($this->isLockable && isset($this->container)) {
             if($form = $this->getLivewire()->getSchema('form')){
                 $form->disabled(! $hasControl);
             }
@@ -307,6 +324,7 @@ class GazeBanner extends Component
             'controlUser' => $lockUser ?? false,
             'hasControl' => $hasControl,
             'canTakeControl' => $this->canTakeControl,
+            'takeControlButton' => $this->takeControlButton,
         ]);
     }
 }
