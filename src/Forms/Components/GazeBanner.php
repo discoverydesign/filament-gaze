@@ -5,7 +5,9 @@ namespace DiscoveryDesign\FilamentGaze\Forms\Components;
 use Carbon\Carbon;
 use Closure;
 use Filament\Facades\Filament;
+use Filament\Forms\Components\Field;
 use Filament\Schemas\Components\Component;
+use Filament\Support\Components\Attributes\ExposedLivewireMethod;
 use Illuminate\Support\Facades\Cache;
 
 /**
@@ -16,7 +18,7 @@ use Illuminate\Support\Facades\Cache;
  * It provides methods to set a custom identifier and the poll timer.
  * The component refreshes the list of viewers and renders the banner.
  */
-class GazeBanner extends Component
+class GazeBanner extends Field
 {
     use Concerns\ListensToEvents;
     /**
@@ -45,17 +47,6 @@ class GazeBanner extends Component
     public bool $canTakeControl = false;
 
     /**
-     * Create a new instance of the GazeBanner component.
-     */
-    public static function make(): static
-    {
-        $static = app(static::class);
-        $static->configure();
-
-        return $static;
-    }
-
-    /**
      * Configure the GazeBanner component.
      *
      * This method sets the component's view and initializes the current viewers.
@@ -82,7 +73,7 @@ class GazeBanner extends Component
     public function pollTimer($poll)
     {
         $this->pollTimer = $poll;
-        $this->poll($this->pollTimer);
+        $this->poll($this->pollTimer . 's');
 
         return $this;
     }
@@ -129,6 +120,7 @@ class GazeBanner extends Component
         return $this;
     }
 
+    #[ExposedLivewireMethod]
     public function takeControl()
     {
         // Set everyone but self to false
@@ -307,6 +299,7 @@ class GazeBanner extends Component
             'controlUser' => $lockUser ?? false,
             'hasControl' => $hasControl,
             'canTakeControl' => $this->canTakeControl,
+            'key' => $this->getKey(),
         ]);
     }
 }

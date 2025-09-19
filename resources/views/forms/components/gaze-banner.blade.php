@@ -37,7 +37,7 @@
             </div>
 
             @if($isLockable && !$hasControl && $canTakeControl)
-                <x-filament::button class="button-container" color="primary" wire:click="$dispatch('FilamentGaze::takeControl')">
+                <x-filament::button class="button-container" color="primary" @click="await $wire.callSchemaComponentMethod('{{ $key }}', 'takeControl')">
                     {{ __('filament-gaze::gaze.lock_take_control') }}
                 </x-filament::button>
             @endif
