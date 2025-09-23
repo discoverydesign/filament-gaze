@@ -85,16 +85,8 @@ class GazeBanner extends Field
     {
         $this->isLockable = (bool) $this->evaluate($fnc);
 
-        if ($this->isLockable) {
-            $this->registerListeners([
-                'FilamentGaze::takeControl' => [
-                    function () {
-                        $this->refreshForm();
-                        $this->takeControl();
-                    },
-                ],
-            ]);
-        }
+        $this->refreshForm();
+        $this->takeControl();
 
         return $this;
     }
@@ -123,6 +115,10 @@ class GazeBanner extends Field
     #[ExposedLivewireMethod]
     public function takeControl()
     {
+        if (! isset($this->container)) {
+            return;
+        }
+
         // Set everyone but self to false
         $identifier = $this->getIdentifier();
         $curViewers = Cache::get('filament-gaze-' . $identifier, []);
@@ -142,26 +138,22 @@ class GazeBanner extends Field
 
     public function getIdentifier()
     {
-        if (! $this->identifier) {
-            $record = $this->getRecord();
-            if (! $record) {
-                $this->identifier = (string) $this->getModel();
-            } else {
-                $this->identifier = get_class($record) . '-' . $record->id;
-            }
-        }
-
-        return $this->identifier;
+        return $this->identifier ?? $this->key;
     }
 
     public function refreshForm()
     {
         // Very hacky, maybe a better solution for this?
-	    $record = $this->getRecord();
+    	// Guard: container may not be initialized yet during configuration
+    	if (!isset($this->container)) {
+    	    return;
+    	}
 
-	    if ($record) {
-                $this->getLivewire()->mount($record->{$record->getRouteKeyName()});
-	    }
+        $record = $this->getRecord();
+
+        if ($record) {
+            $this->getLivewire()->mount($record->{$record->getRouteKeyName()});
+        }
     }
 
     /**
@@ -211,11 +203,17 @@ class GazeBanner extends Field
         }
 
         $user = auth()->guard($authGuard)->user();
+        $displayName = 'Unknown';
+        if ($user) {
+            $displayName = ($user instanceof \Filament\Models\Contracts\HasName)
+                ? $user->getFilamentName()
+                : ($user->name ?? 'Unknown');
+        }
         // Add/re-add the current user to the list
         $curViewers[] = [
             'id' => auth()->guard($authGuard)->id(),
             'guard' => $authGuard,
-            'name' => $user?->name ?? $user?->getFilamentName() ?? 'Unknown', // Possibly need to account for more?
+            'name' => $displayName, // Possibly need to account for more?
             'expires' => now()->addSeconds(max([5, $this->pollTimer * 2])),
             'has_control' => $this->isLockable && ($lockState || (count($curViewers) === 0)),
         ];
@@ -281,12 +279,12 @@ class GazeBanner extends Field
         $lockUser = collect($this->currentViewers)->where('has_control', true)->first();
         $hasControl = isset($lockUser) && $lockUser['id'] == auth()->guard($authGuard)->id();
 
-        if ($this->isLockable) {
-            if($form = $this->getLivewire()->getSchema('form')){
-                $form->disabled(! $hasControl);
+        if ($this->isLockable && isset($this->container)) {
+            if($form = $this->getLivewire()->getSchema('form')) {
+                $form->disabled(!$hasControl);
             }
-            if($childForm = $this->getLivewire()->getSchema('mountedTableActionForm')){
-                $childForm->disabled(! $hasControl);
+            if($childForm = $this->getLivewire()->getSchema('mountedTableActionForm')) {
+                $childForm->disabled(!$hasControl);
             }
         }
 
