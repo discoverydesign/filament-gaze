@@ -58,13 +58,7 @@ class GazeBanner extends Component
         return $static;
     }
 
-    public function
 
-    /**
-     * Configure the GazeBanner component.
-     *
-     * This method sets the component's view and initializes the current viewers.
-     */
     /**
      * Set a custom identifier for the GazeBanner component.
      *
@@ -131,9 +125,17 @@ class GazeBanner extends Component
         return $this;
     }
 
-    public function takeControl()
+    /**
+     * Handle the take control event from the button click.
+     * This method can be called directly or via Livewire event.
+     */
+    #[On('filament-gaze-take-control-handler')]
+    public function takeControl($componentId = null)
     {
-        dd(1);
+        // Only process if this component matches the componentId, or if componentId is null (direct call)
+        if ($componentId !== null && $componentId !== $this->getId()) {
+            return;
+        }
 
         if (!isset($this->container)) {
             return;
@@ -154,7 +156,11 @@ class GazeBanner extends Component
 
         Cache::put('filament-gaze-' . $identifier, $curViewers, now()->addSeconds(max([5, $this->pollTimer * 2])));
 
+        // Refresh the form to update the UI
+        $this->refreshForm();
     }
+
+
 
     public function getIdentifier()
     {
