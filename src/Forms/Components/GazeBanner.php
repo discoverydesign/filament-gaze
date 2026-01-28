@@ -8,7 +8,7 @@ use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Schemas\Components\Component;
 use Illuminate\Support\Facades\Cache;
-use Livewire\Attributes\On;
+use Filament\Support\Components\Attributes\ExposedLivewireMethod;
 
 /**
  * Class GazeBanner
@@ -58,6 +58,13 @@ class GazeBanner extends Component
         return $static;
     }
 
+    protected function setUp(): void
+	{
+	    parent::setUp();
+	
+		$this->key('filamentGazeBanner');
+	}
+
 
     /**
      * Set a custom identifier for the GazeBanner component.
@@ -81,7 +88,7 @@ class GazeBanner extends Component
     public function pollTimer($poll)
     {
         $this->pollTimer = $poll;
-        $this->poll($this->pollTimer);
+        $this->poll($this->pollTimer . 's');
 
         return $this;
     }
@@ -127,16 +134,11 @@ class GazeBanner extends Component
 
     /**
      * Handle the take control event from the button click.
-     * This method can be called directly or via Livewire event.
+     * Called via $wire.callSchemaComponentMethod from the frontend.
      */
-    #[On('filament-gaze-take-control-handler')]
-    public function takeControl($componentId = null)
+    #[ExposedLivewireMethod]
+    public function takeControl()
     {
-        // Only process if this component matches the componentId, or if componentId is null (direct call)
-        if ($componentId !== null && $componentId !== $this->getId()) {
-            return;
-        }
-
         if (!isset($this->container)) {
             return;
         }
@@ -331,6 +333,7 @@ class GazeBanner extends Component
             'hasControl' => $hasControl,
             'canTakeControl' => $this->canTakeControl,
             'takeControlButton' => $this->takeControlButton,
+            'key' => $this->getKey(),
         ]);
     }
 }

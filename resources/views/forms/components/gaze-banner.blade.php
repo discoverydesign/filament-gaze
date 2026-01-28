@@ -6,12 +6,6 @@
 <div
     class="gaze-banner @if($show) gaze-banner--has-content @endif"
     x-data="{}"
-    x-on:filament-gaze-take-control.window="
-        if ($event.detail.componentId === '{{ $getId() }}') {
-            // Use Livewire's event system to call the method
-            $wire.dispatch('filament-gaze-take-control-handler', { componentId: '{{ $getId() }}' })
-        }
-    "
 >
     @if($show)
         <div class="fi-gaze-banner">
@@ -46,9 +40,7 @@
                 <x-filament::button 
                     class="button-container" 
                     color="primary" 
-                    x-on:click="
-                        $dispatch('filament-gaze-take-control', { componentId: '{{ $getId() }}' })
-                    "
+                    wire:click="callSchemaComponentMethod('{{ $key }}', 'takeControl')"
                 >
                     {{ __('filament-gaze::gaze.lock_take_control') }}
                 </x-filament::button>
