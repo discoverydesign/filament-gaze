@@ -33,7 +33,7 @@ class GazeBanner extends Component
     /**
      * The poll timer for refreshing the list of viewers.
      */
-    public string | int $pollTimer = 10;
+    public string | int $pollTimer = 15;
 
     /**
      * Whether the lockable trait has been enabled.
@@ -61,7 +61,7 @@ class GazeBanner extends Component
     protected function setUp(): void
 	{
 	    parent::setUp();
-	
+
 		$this->key('filamentGazeBanner');
 	}
 
@@ -162,7 +162,19 @@ class GazeBanner extends Component
         $this->refreshForm();
     }
 
+    /**
+     * Trigger a re-render when control state changes.
+     * Called from the frontend via Alpine.js when control state changes.
+     */
+    #[ExposedLivewireMethod]
+    public function refreshOnControlChange()
+    {
+        if (!isset($this->container)) {
+            return;
+        }
 
+        $this->refreshForm();
+    }
 
     public function getIdentifier()
     {
@@ -180,16 +192,10 @@ class GazeBanner extends Component
 
     public function refreshForm()
     {
-        // Avoid accessing the container before Filament initializes it.
-        if (! isset($this->container)) {
-            return;
-        }
+        $livewire = $this->getLivewire();
 
-        // Very hacky, maybe a better solution for this?
-        $record = $this->getRecord();
-
-        if ($record) {
-            $this->getLivewire()->mount($record->{$record->getRouteKeyName()});
+        if (method_exists($livewire, 'forceRender')) {
+            $livewire->forceRender();
         }
     }
 
