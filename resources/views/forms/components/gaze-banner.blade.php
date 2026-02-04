@@ -5,7 +5,31 @@
 
 <div
     class="gaze-banner @if($show) gaze-banner--has-content @endif"
+    wire:key="gaze-banner-{{ $key }}-{{ $hasControl ? '1' : '0' }}"
     x-data="{}"
+    x-init="
+        window._gazeControlState ??= {};
+        const key = @js($key);
+        const prev = window._gazeControlState[key];
+        const current = @js($hasControl);
+        
+        if (prev !== undefined && prev !== current) {
+            setTimeout(() => {
+                const wire = $el.closest('[wire\\:id]');
+                if (wire) {
+                    const id = wire.getAttribute('wire:id');
+                    if (id && window.Livewire) {
+                        window.Livewire.find(id)?.callSchemaComponentMethod(key, 'refreshOnControlChange');
+                    }
+                }
+            }, 50);
+        }
+        
+        window._gazeControlState[key] = current;
+    "
+    @if ($pollTimer)
+        wire:poll.{{ $pollTimer }}s
+    @endif
 >
     @if($show)
         <div class="fi-gaze-banner">
@@ -37,7 +61,11 @@
             </div>
 
             @if($isLockable && !$hasControl && $canTakeControl)
-                <x-filament::button class="button-container" color="primary" @click="await $wire.callSchemaComponentMethod('{{ $key }}', 'takeControl')">
+                <x-filament::button 
+                    class="button-container" 
+                    color="primary" 
+                    wire:click="callSchemaComponentMethod('{{ $key }}', 'takeControl')"
+                >
                     {{ __('filament-gaze::gaze.lock_take_control') }}
                 </x-filament::button>
             @endif
