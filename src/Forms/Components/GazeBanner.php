@@ -88,6 +88,11 @@ class GazeBanner extends Field
         $this->refreshForm();
         $this->takeControl();
 
+        // Set the poll if not already
+        if (!$this->getPollingInterval()) {
+            $this->poll($this->pollTimer);
+        }
+
         return $this;
     }
 
@@ -144,10 +149,10 @@ class GazeBanner extends Field
     public function refreshForm()
     {
         // Very hacky, maybe a better solution for this?
-    	// Guard: container may not be initialized yet during configuration
-    	if (!isset($this->container)) {
-    	    return;
-    	}
+        // Guard: container may not be initialized yet during configuration
+        if (!isset($this->container)) {
+            return;
+        }
 
         $record = $this->getRecord();
 
