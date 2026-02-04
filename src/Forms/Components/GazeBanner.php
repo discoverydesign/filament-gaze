@@ -4,9 +4,11 @@ namespace DiscoveryDesign\FilamentGaze\Forms\Components;
 
 use Carbon\Carbon;
 use Closure;
+use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Schemas\Components\Component;
 use Illuminate\Support\Facades\Cache;
+use Filament\Support\Components\Attributes\ExposedLivewireMethod;
 
 /**
  * Class GazeBanner
@@ -18,7 +20,6 @@ use Illuminate\Support\Facades\Cache;
  */
 class GazeBanner extends Component
 {
-    use Concerns\ListensToEvents;
     /**
      * The array of current viewers.
      */
@@ -32,7 +33,7 @@ class GazeBanner extends Component
     /**
      * The poll timer for refreshing the list of viewers.
      */
-    public string | int $pollTimer = 10;
+    public string | int $pollTimer = 15;
 
     /**
      * Whether the lockable trait has been enabled.
@@ -43,6 +44,8 @@ class GazeBanner extends Component
      * Whether the lockable trait has been enabled.
      */
     public bool $canTakeControl = false;
+
+    public $takeControlButton = null;
 
     /**
      * Create a new instance of the GazeBanner component.
@@ -55,11 +58,14 @@ class GazeBanner extends Component
         return $static;
     }
 
-    /**
-     * Configure the GazeBanner component.
-     *
-     * This method sets the component's view and initializes the current viewers.
-     */
+    protected function setUp(): void
+	{
+	    parent::setUp();
+
+		$this->key('filamentGazeBanner');
+	}
+
+
     /**
      * Set a custom identifier for the GazeBanner component.
      *
@@ -82,7 +88,7 @@ class GazeBanner extends Component
     public function pollTimer($poll)
     {
         $this->pollTimer = $poll;
-        $this->poll($this->pollTimer);
+        $this->poll($this->pollTimer . 's');
 
         return $this;
     }
@@ -95,14 +101,11 @@ class GazeBanner extends Component
         $this->isLockable = (bool) $this->evaluate($fnc);
 
         if ($this->isLockable) {
-            $this->registerListeners([
-                'FilamentGaze::takeControl' => [
-                    function () {
-                        $this->refreshForm();
-                        $this->takeControl();
-                    },
-                ],
-            ]);
+            // Only attempt to interact with Livewire once the container is initialized.
+            if (isset($this->container)) {
+                $this->refreshForm();
+                $this->takeControl();
+            }
         }
 
         return $this;
@@ -129,8 +132,17 @@ class GazeBanner extends Component
         return $this;
     }
 
+    /**
+     * Handle the take control event from the button click.
+     * Called via $wire.callSchemaComponentMethod from the frontend.
+     */
+    #[ExposedLivewireMethod]
     public function takeControl()
     {
+        if (!isset($this->container)) {
+            return;
+        }
+
         // Set everyone but self to false
         $identifier = $this->getIdentifier();
         $curViewers = Cache::get('filament-gaze-' . $identifier, []);
@@ -146,6 +158,22 @@ class GazeBanner extends Component
 
         Cache::put('filament-gaze-' . $identifier, $curViewers, now()->addSeconds(max([5, $this->pollTimer * 2])));
 
+        // Refresh the form to update the UI
+        $this->refreshForm();
+    }
+
+    /**
+     * Trigger a re-render when control state changes.
+     * Called from the frontend via Alpine.js when control state changes.
+     */
+    #[ExposedLivewireMethod]
+    public function refreshOnControlChange()
+    {
+        if (!isset($this->container)) {
+            return;
+        }
+
+        $this->refreshForm();
     }
 
     public function getIdentifier()
@@ -164,12 +192,11 @@ class GazeBanner extends Component
 
     public function refreshForm()
     {
-        // Very hacky, maybe a better solution for this?
-	    $record = $this->getRecord();
+        $livewire = $this->getLivewire();
 
-	    if ($record) {
-                $this->getLivewire()->mount($record->{$record->getRouteKeyName()});
-	    }
+        if (method_exists($livewire, 'forceRender')) {
+            $livewire->forceRender();
+        }
     }
 
     /**
@@ -182,6 +209,10 @@ class GazeBanner extends Component
      */
     public function refreshViewers()
     {
+        if (! isset($this->container)) {
+            return;
+        }
+
         $identifier = $this->getIdentifier();
         $authGuard = Filament::getCurrentPanel()->getAuthGuard();
 
@@ -289,7 +320,7 @@ class GazeBanner extends Component
         $lockUser = collect($this->currentViewers)->where('has_control', true)->first();
         $hasControl = isset($lockUser) && $lockUser['id'] == auth()->guard($authGuard)->id();
 
-        if ($this->isLockable) {
+        if ($this->isLockable && isset($this->container)) {
             if($form = $this->getLivewire()->getSchema('form')){
                 $form->disabled(! $hasControl);
             }
@@ -307,6 +338,8 @@ class GazeBanner extends Component
             'controlUser' => $lockUser ?? false,
             'hasControl' => $hasControl,
             'canTakeControl' => $this->canTakeControl,
+            'takeControlButton' => $this->takeControlButton,
+            'key' => $this->getKey(),
         ]);
     }
 }
