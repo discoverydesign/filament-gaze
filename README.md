@@ -58,7 +58,7 @@ class OrderResource extends Resource
     {
         return $form
             ->schema([
-                GazeBanner::make(),
+                GazeBanner::make('gaze_banner'), // Must be unique to each banner. If you have 2 or more banners in 1 schema, you must pass unique identifiers to them.
                     
                 // ...
             ]);
@@ -70,37 +70,37 @@ class OrderResource extends Resource
 
 ### Poll Timer Example
 ```php
-GazeBanner::make()
+GazeBanner::make('gaze_banner')
     ->pollTimer(10),
 ```
 
 ### Identifier Example
 ```php
-GazeBanner::make()
+GazeBanner::make('gaze_banner')
     ->identifier('any-order'),
 ```
 
 ### Lock Example
 ```php
-GazeBanner::make()
+GazeBanner::make('gaze_banner')
     ->lock()
 ```
 
 ### Lock With Control Example
 ```php
-GazeBanner::make()
+GazeBanner::make('gaze_banner')
     ->lock()
     ->canTakeControl(fn() => auth()->user()->isAdmin())
 ```
 
 ### Hiding Gaze Banner on Create Form Example
 ```php
-GazeBanner::make()
+GazeBanner::make('gaze_banner')
     ->hidden(fn (?Order $record) => $record === null),
 ```
 There is also a helper function
 ```php
-GazeBanner::make()
+GazeBanner::make('gaze_banner')
     ->hideOnCreate(),
 ```
 
