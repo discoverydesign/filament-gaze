@@ -69,6 +69,11 @@ class GazeBanner extends Field
         return $this;
     }
 
+    public static function getDefaultName(): string
+    {
+        return 'banner';
+    }
+
     /**
      * Set the poll timer for refreshing the list of viewers.
      *
