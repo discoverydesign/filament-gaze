@@ -70,19 +70,19 @@ class OrderResource extends Resource
 
 ### Poll Timer Example
 ```php
-GazeBanner::make('gaze_banner')
+GazeBanner::make()
     ->pollTimer(10),
 ```
 
 ### Identifier Example
 ```php
-GazeBanner::make('gaze_banner')
+GazeBanner::make()
     ->identifier('any-order'),
 ```
 
 ### Lock Example
 ```php
-GazeBanner::make('gaze_banner')
+GazeBanner::make()
     ->lock()
 ```
 
