@@ -172,7 +172,16 @@ class GazeBanner extends Field
 
     public function getIdentifier()
     {
-        return $this->identifier ?? $this->key;
+        if (!$this->identifier) {
+            $record = $this->getRecord();
+            if (!$record) {
+                $this->identifier = (string) $this->getModel();
+            } else {
+                $this->identifier = get_class($record) . '-' . $record->getKey();
+            }
+        }
+
+        return $this->identifier;
     }
 
     public function refreshForm()
