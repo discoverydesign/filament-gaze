@@ -104,6 +104,28 @@ GazeBanner::make('gaze_banner')
     ->hideOnCreate(),
 ```
 
+## Table column and helper
+
+Use the helper and table column for list views:
+
+```php
+use DiscoveryDesign\FilamentGaze\Gaze;
+use DiscoveryDesign\FilamentGaze\Tables\Columns\GazeColumn;
+
+GazeColumn::make();
+
+if (Gaze::isOpened($record)) {
+    // somebody is currently viewing this record
+}
+```
+
+Available helper methods:
+
+- `Gaze::isOpened($record, $excludeCurrentUser = true)`
+- `Gaze::getViewerCount($record, $excludeCurrentUser = false)`
+- `Gaze::isLockedByOther($record)`
+- `Gaze::getViewers($record, $excludeCurrentUser = true)`
+- `Gaze::getIdentifier($record)`
 
 ## Docs
 
@@ -156,4 +178,3 @@ To [customize the icons](https://filamentphp.com/docs/3.x/support/icons#replacin
 ## Author
 
 🚀 [Discovery Design](https://discoverydesign.co.uk)
-
