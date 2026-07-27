@@ -37,11 +37,13 @@ $panel->plugins([
 3. Publish the assets with `php artisan filament:assets`.
 4. Import the package inside your Filament Resource with `use DiscoveryDesign\FilamentGaze\Forms\Components\GazeBanner`.
 5. Add the `GazeBanner` form component to your form with `GazeBanner::make()`.
-6. If required, publish the translation files with `php artisan vendor:publish --tag=filament-gaze-translations`.
+6. (Optionally) add the `GazeColumn` table column to your table with `GazeColumn::make()`.
+7. If required, publish the translation files with `php artisan vendor:publish --tag=filament-gaze-translations`.
 
 ## Examples
 
 ### Basic Example
+
 ```php
 <?php
 
@@ -60,6 +62,16 @@ class OrderResource extends Resource
             ->schema([
                 GazeBanner::make('gaze_banner'), // Must be unique to each banner. If you have 2 or more banners in 1 schema, you must pass unique identifiers to them.
                     
+                // ...
+            ]);
+    }
+    
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                GazeColumn::make(), 
+                
                 // ...
             ]);
     }
