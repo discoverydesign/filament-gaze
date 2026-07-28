@@ -10,7 +10,7 @@ use Filament\Tables\Columns\TextColumn;
 
 final class GazeColumn extends TextColumn
 {
-    protected bool $excludeCurrentUser = false;
+    protected bool $excludeCurrentUser = true;
 
     public static function make(string|null $name = null): static
     {
@@ -24,16 +24,6 @@ final class GazeColumn extends TextColumn
         return $this;
     }
 
-    public function getState(): mixed
-    {
-        return $this->getIsOpened($this->getRecord());
-    }
-
-    public function getIsOpened($record): bool
-    {
-        return Gaze::isOpened($record, $this->excludeCurrentUser);
-    }
-
     public function getId(): string
     {
         return 'filament-gaze-gaze-column';
@@ -44,18 +34,13 @@ final class GazeColumn extends TextColumn
         parent::setUp();
 
         $this
-            ->label('Viewing')
+            ->label(__('filament-gaze::gaze.column_label'))
             ->tooltip(__('filament-gaze::gaze.tooltip'))
             ->icon(Heroicon::OutlinedUser)
             ->iconColor(fn ($record) => $this->getViewerCount($record) > 0 ? 'danger' : 'success')
             ->formatStateUsing(fn ($record) => $this->getViewerCount($record))
-            ->toggleable()
-            ->sortable(false)
-            ->searchable(false);
-    }
-
-    public function getViewerCount($record): int
-    {
-        return Gaze::getViewerCount($record, $this->excludeCurrentUser);
+            ->getStateUsing(fn ($record): int => Gaze::getViewerCount($record, $this->excludeCurrentUser))
+            ->iconColor(fn ($state): string => $state > 0 ? 'danger' : 'success')
+            ->toggleable();
     }
 }
