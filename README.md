@@ -37,11 +37,13 @@ $panel->plugins([
 3. Publish the assets with `php artisan filament:assets`.
 4. Import the package inside your Filament Resource with `use DiscoveryDesign\FilamentGaze\Forms\Components\GazeBanner`.
 5. Add the `GazeBanner` form component to your form with `GazeBanner::make()`.
-6. If required, publish the translation files with `php artisan vendor:publish --tag=filament-gaze-translations`.
+6. (Optionally) add the `GazeColumn` table column to your table with `GazeColumn::make()`.
+7. If required, publish the translation files with `php artisan vendor:publish --tag=filament-gaze-translations`.
 
 ## Examples
 
 ### Basic Example
+
 ```php
 <?php
 
@@ -60,6 +62,16 @@ class OrderResource extends Resource
             ->schema([
                 GazeBanner::make('gaze_banner'), // Must be unique to each banner. If you have 2 or more banners in 1 schema, you must pass unique identifiers to them.
                     
+                // ...
+            ]);
+    }
+    
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                GazeColumn::make(), 
+                
                 // ...
             ]);
     }
@@ -104,6 +116,28 @@ GazeBanner::make('gaze_banner')
     ->hideOnCreate(),
 ```
 
+## Table column and helper
+
+Use the helper and table column for list views:
+
+```php
+use DiscoveryDesign\FilamentGaze\Gaze;
+use DiscoveryDesign\FilamentGaze\Tables\Columns\GazeColumn;
+
+GazeColumn::make();
+
+if (Gaze::isOpened($record)) {
+    // somebody is currently viewing this record
+}
+```
+
+Available helper methods:
+
+- `Gaze::isOpened($record, $excludeCurrentUser = true)`
+- `Gaze::getViewerCount($record, $excludeCurrentUser = false)`
+- `Gaze::isLockedByOther($record)`
+- `Gaze::getViewers($record, $excludeCurrentUser = true)`
+- `Gaze::getIdentifier($record)`
 
 ## Docs
 
@@ -156,4 +190,3 @@ To [customize the icons](https://filamentphp.com/docs/3.x/support/icons#replacin
 ## Author
 
 🚀 [Discovery Design](https://discoverydesign.co.uk)
-
