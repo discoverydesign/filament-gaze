@@ -36,11 +36,9 @@ final class GazeColumn extends TextColumn
         $this
             ->label(__('filament-gaze::gaze.column_label'))
             ->tooltip(__('filament-gaze::gaze.tooltip'))
-            ->icon(Heroicon::OutlinedUser)
-            ->iconColor(fn ($record) => $this->getViewerCount($record) > 0 ? 'danger' : 'success')
-            ->formatStateUsing(fn ($record) => $this->getViewerCount($record))
+            ->icon(Heroicon::OutlinedEye)
             ->getStateUsing(fn ($record): int => Gaze::getViewerCount($record, $this->excludeCurrentUser))
-            ->iconColor(fn ($state): string => $state > 0 ? 'danger' : 'success')
+            ->iconColor(fn ($state): string => $state > 0 ? 'primary' : 'gray')
             ->toggleable();
     }
 }
