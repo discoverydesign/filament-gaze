@@ -40,7 +40,7 @@ $panel->plugins([
 6. (Optionally) add the `GazeColumn` table column to your table with `GazeColumn::make()`.
 7. If required, publish the translation files with `php artisan vendor:publish --tag=filament-gaze-translations`.
 
-## Examples
+## Gaze Banner Examples
 
 ### Basic Example
 
@@ -62,16 +62,6 @@ class OrderResource extends Resource
             ->schema([
                 GazeBanner::make('gaze_banner'), // Must be unique to each banner. If you have 2 or more banners in 1 schema, you must pass unique identifiers to them.
                     
-                // ...
-            ]);
-    }
-    
-    public static function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-                GazeColumn::make(), 
-                
                 // ...
             ]);
     }
@@ -116,31 +106,65 @@ GazeBanner::make('gaze_banner')
     ->hideOnCreate(),
 ```
 
-## Table column and helper
+## Gaze Table Column Examples
 
-Use the helper and table column for list views:
+### Basic Example
 
 ```php
-use DiscoveryDesign\FilamentGaze\Gaze;
+<?php
+
+namespace App\Filament\Resources\Orders\Tables;
+
 use DiscoveryDesign\FilamentGaze\Tables\Columns\GazeColumn;
+// ...
 
-GazeColumn::make();
+class OrderTable extends Resource
+{
+    // ...
 
-if (Gaze::isOpened($record)) {
-    // somebody is currently viewing this record
+    public static function configure(Table $table): Table
+    {
+        return $table
+            ->columns([
+                GazeColumn::make(),
+
+                // ...
+            ]);
+    }
+    
+    // ...
 }
 ```
 
-Available helper methods:
+### Identifier Example
+```php
+GazeColumn::make()
+    ->identifier('any-order'),
+```
 
-- `Gaze::isOpened($record, $excludeCurrentUser = true)`
-- `Gaze::getViewerCount($record, $excludeCurrentUser = true)`
-- `Gaze::isLockedByOther($record)`
-- `Gaze::getViewers($record, $excludeCurrentUser = true)`
-- `Gaze::getIdentifier($record)`
+## Gaze Helper
 
-Every helper accepts either a model or an identifier string, so records tracked
-under a custom identifier can be read too:
+There is a helper that can be used to get/set Gaze state.
+
+
+### Available Methods
+```php
+DiscoveryDesign\FilamentGaze\Gaze::isOpened($record, $excludeCurrentUser = true)
+```
+```php
+DiscoveryDesign\FilamentGaze\Gaze::getViewerCount($record, $excludeCurrentUser = true)
+```
+```php
+DiscoveryDesign\FilamentGaze\Gaze::isLockedByOther($record)
+```
+```php
+DiscoveryDesign\FilamentGaze\Gaze::getViewers($record, $excludeCurrentUser = true)
+```
+```php
+DiscoveryDesign\FilamentGaze\Gaze::getIdentifier($record)
+```
+
+``$record`` can also be a ``string`` when a custom identifier is being used in the banner.
 
 ```php
 Gaze::getViewerCount($order);      // uses the default identifier for the model
@@ -160,7 +184,7 @@ Gaze::getViewerCount('any-order'); // matches GazeBanner::make()->identifier('an
 ### `->identifier($fnc)`
 
 #### Description
-`identifier` is used as a unique identifier for this gaze banner. Any other gaze banners with the same identifier will share the same list of active users. This can be useful if you want 2 or more difference resources to share the same list of active viewing users.
+`identifier` is used as a unique identifier for this gaze banner (or gaze column). Any other gaze banners with the same identifier will share the same list of active users. This can be useful if you want 2 or more difference resources to share the same list of active viewing users.
 
 #### Arguments
 `fnc` - (optional, closure | string) The name of the identifier. Default is the resource's model class combines with model Id.
