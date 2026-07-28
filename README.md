@@ -134,10 +134,18 @@ if (Gaze::isOpened($record)) {
 Available helper methods:
 
 - `Gaze::isOpened($record, $excludeCurrentUser = true)`
-- `Gaze::getViewerCount($record, $excludeCurrentUser = false)`
+- `Gaze::getViewerCount($record, $excludeCurrentUser = true)`
 - `Gaze::isLockedByOther($record)`
 - `Gaze::getViewers($record, $excludeCurrentUser = true)`
 - `Gaze::getIdentifier($record)`
+
+Every helper accepts either a model or an identifier string, so records tracked
+under a custom identifier can be read too:
+
+```php
+Gaze::getViewerCount($order);      // uses the default identifier for the model
+Gaze::getViewerCount('any-order'); // matches GazeBanner::make()->identifier('any-order')
+```
 
 ## Docs
 

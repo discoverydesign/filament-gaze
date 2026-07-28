@@ -4,86 +4,119 @@ declare(strict_types=1);
 
 namespace DiscoveryDesign\FilamentGaze;
 
+use DateTimeInterface;
 use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 
+/**
+ * Class Gaze
+ *
+ * Central helper for reading and writing the viewer list that backs the
+ * GazeBanner and GazeColumn. Owns the cache key format, the expiry rules and
+ * the auth guard resolution so that all components agree on them.
+ */
 final class Gaze
 {
-    public static function isOpened(null|Model $record, bool $excludeCurrentUser = true): bool
-    {
-        $viewers = self::getViewers($record, $excludeCurrentUser);
+    public const CACHE_PREFIX = 'filament-gaze-';
 
-        return count($viewers) > 0;
+    /**
+     * Resolve the identifier used to store viewers against a record.
+     *
+     * A string is passed straight through, so callers that already hold a
+     * custom identifier (see GazeBanner::identifier()) can use every helper.
+     */
+    public static function getIdentifier(Model | string $record): string
+    {
+        if (is_string($record)) {
+            return $record;
+        }
+
+        return get_class($record) . '-' . $record->getKey();
     }
 
-    public static function getViewers(null|Model $record, bool $excludeCurrentUser = true): array
+    public static function getCacheKey(Model | string $record): string
     {
-        if (!$record) {
+        return self::CACHE_PREFIX . self::getIdentifier($record);
+    }
+
+    /**
+     * Every viewer stored against the record, including expired entries, the
+     * current user, and viewers belonging to other auth guards.
+     */
+    public static function getRawViewers(Model | string $record): array
+    {
+        return Cache::get(self::getCacheKey($record), []);
+    }
+
+    public static function putViewers(Model | string $record, array $viewers, DateTimeInterface $expires): void
+    {
+        Cache::put(self::getCacheKey($record), $viewers, $expires);
+    }
+
+    /**
+     * Viewers that are still active and belong to the current auth guard.
+     */
+    public static function getViewers(Model | string | null $record, bool $excludeCurrentUser = true): array
+    {
+        if (! $record) {
             return [];
         }
 
+        $authGuard = self::getAuthGuard();
         $currentUserId = self::getCurrentUserId();
+
         $viewers = [];
 
         foreach (self::getRawViewers($record) as $viewer) {
-            if ($excludeCurrentUser && isset($viewer['id']) && $viewer['id'] === $currentUserId) {
+            if (! isset($viewer['expires']) || Carbon::parse($viewer['expires'])->isPast()) {
                 continue;
             }
 
-            if (isset($viewer['expires']) && now()->lt(Carbon::parse($viewer['expires']))) {
-                $viewers[] = $viewer;
+            // Viewers stored before guards were tracked have no guard, so are kept.
+            if (isset($viewer['guard']) && $viewer['guard'] !== $authGuard) {
+                continue;
             }
+
+            if ($excludeCurrentUser && isset($viewer['id']) && $viewer['id'] == $currentUserId) {
+                continue;
+            }
+
+            $viewers[] = $viewer;
         }
 
         return $viewers;
     }
 
-    private static function getCurrentUserId(): mixed
+    public static function isOpened(Model | string | null $record, bool $excludeCurrentUser = true): bool
     {
-        $authGuard = Filament::getCurrentPanel()?->getAuthGuard() ?? config('filament.default_auth_guard', 'web');
-
-        return auth()->guard($authGuard)?->id();
+        return self::getViewerCount($record, $excludeCurrentUser) > 0;
     }
 
-    private static function getRawViewers(Model $record): array
+    public static function getViewerCount(Model | string | null $record, bool $excludeCurrentUser = true): int
     {
-        $identifier = self::getIdentifier($record);
-
-        return Cache::get('filament-gaze-' . $identifier, []);
+        return count(self::getViewers($record, $excludeCurrentUser));
     }
 
-    public static function getIdentifier(Model $record): string
+    public static function isLockedByOther(Model | string | null $record): bool
     {
-        return get_class($record) . '-' . $record->getKey();
-    }
-
-    public static function getViewerCount(null|Model $record, bool $excludeCurrentUser = false): int
-    {
-        $viewers = self::getViewers($record, $excludeCurrentUser);
-
-        return count($viewers);
-    }
-
-    public static function isLockedByOther(null|Model $record): bool
-    {
-        if (!$record) {
-            return false;
-        }
-
-        $currentUserId = self::getCurrentUserId();
-
-        foreach (self::getRawViewers($record) as $viewer) {
-            if (
-                ($viewer['has_control'] ?? false) === true
-                && isset($viewer['id']) && $viewer['id'] !== $currentUserId
-                && isset($viewer['expires']) && now()->lt(Carbon::parse($viewer['expires']))
-            ) {
+        foreach (self::getViewers($record) as $viewer) {
+            if ($viewer['has_control'] ?? false) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    public static function getAuthGuard(): string
+    {
+        return Filament::getCurrentPanel()?->getAuthGuard() ?? 'web';
+    }
+
+    public static function getCurrentUserId(): mixed
+    {
+        return auth()->guard(self::getAuthGuard())->id();
     }
 }

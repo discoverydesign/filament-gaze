@@ -1,7 +1,9 @@
 <?php
 
 return [
+    'column_label' => 'Viewing',
     'tooltip' => 'Number of people currently viewing this record.',
+
     'banner_text' => 'This page is currently being viewed by :viewers.',
     'banner_text_other' => 'This page is currently being viewed by :viewers and :count other.',
     'banner_text_others' => 'This page is currently being viewed by :viewers and :count others.',

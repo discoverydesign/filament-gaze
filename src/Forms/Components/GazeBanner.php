@@ -4,12 +4,11 @@ namespace DiscoveryDesign\FilamentGaze\Forms\Components;
 
 use Carbon\Carbon;
 use Closure;
+use DiscoveryDesign\FilamentGaze\Gaze;
 use Filament\Actions\Action;
-use Filament\Facades\Filament;
 use Filament\Forms\Components\Field;
 use Filament\Schemas\Components\Component;
 use Filament\Support\Components\Attributes\ExposedLivewireMethod;
-use Illuminate\Support\Facades\Cache;
 
 /**
  * Class GazeBanner
@@ -144,18 +143,18 @@ class GazeBanner extends Field
 
         // Set everyone but self to false
         $identifier = $this->getIdentifier();
-        $curViewers = Cache::get('filament-gaze-' . $identifier, []);
+        $curViewers = Gaze::getRawViewers($identifier);
 
-        $authGuard = Filament::getCurrentPanel()->getAuthGuard();
+        $currentUserId = Gaze::getCurrentUserId();
         foreach ($curViewers as $key => $viewer) {
-            if ($viewer['id'] == auth()->guard($authGuard)->id()) {
+            if ($viewer['id'] == $currentUserId) {
                 $curViewers[$key]['has_control'] = true;
             } else {
                 $curViewers[$key]['has_control'] = false;
             }
         }
 
-        Cache::put('filament-gaze-' . $identifier, $curViewers, now()->addSeconds(max([5, $this->pollTimer * 2])));
+        Gaze::putViewers($identifier, $curViewers, now()->addSeconds(max([5, $this->pollTimer * 2])));
 
         // Refresh the form to update the UI
         $this->refreshForm();
@@ -182,7 +181,7 @@ class GazeBanner extends Field
             if (!$record) {
                 $this->identifier = (string) $this->getModel();
             } else {
-                $this->identifier = get_class($record) . '-' . $record->getKey();
+                $this->identifier = Gaze::getIdentifier($record);
             }
         }
 
@@ -213,13 +212,14 @@ class GazeBanner extends Field
         }
 
         $identifier = $this->getIdentifier();
-        $authGuard = Filament::getCurrentPanel()->getAuthGuard();
+        $authGuard = Gaze::getAuthGuard();
+        $currentUserId = Gaze::getCurrentUserId();
 
         $someoneHasLockState = false;
         $lockState = false;
 
         // Check over all current viewers
-        $curViewers = Cache::get('filament-gaze-' . $identifier, []);
+        $curViewers = Gaze::getRawViewers($identifier);
         foreach ($curViewers as $key => $viewer) {
 
             if (isset($viewer['guard']) && $authGuard !== $viewer['guard']) {
@@ -236,7 +236,7 @@ class GazeBanner extends Field
             }
 
             // If current user, remove them so they can be re-added below.
-            if ($viewer['id'] == auth()->guard($authGuard)?->id()) {
+            if ($viewer['id'] == $currentUserId) {
                 // Preserve their active lock state
                 $lockState = $viewer['has_control'];
 
@@ -257,7 +257,7 @@ class GazeBanner extends Field
         }
         // Add/re-add the current user to the list
         $curViewers[] = [
-            'id' => auth()->guard($authGuard)->id(),
+            'id' => $currentUserId,
             'guard' => $authGuard,
             'name' => $displayName, // Possibly need to account for more?
             'expires' => now()->addSeconds(max([5, $this->pollTimer * 2])),
@@ -271,7 +271,7 @@ class GazeBanner extends Field
                 $curViewers[$key]['has_control'] = true;
 
                 // Refresh the form is it's the current user being given control.
-                if ($viewer['id'] == auth()->guard($authGuard)->id()) {
+                if ($viewer['id'] == $currentUserId) {
                     $this->refreshForm();
                 }
 
@@ -281,7 +281,7 @@ class GazeBanner extends Field
 
         $this->currentViewers = $curViewers;
 
-        Cache::put('filament-gaze-' . $identifier, $curViewers, now()->addSeconds($this->pollTimer * 2));
+        Gaze::putViewers($identifier, $curViewers, now()->addSeconds($this->pollTimer * 2));
     }
 
     /**
@@ -295,9 +295,9 @@ class GazeBanner extends Field
 
         $formattedViewers = '';
         $currentViewers = collect($this->currentViewers);
-        $authGuard = Filament::getCurrentPanel()->getAuthGuard();
-        $filteredViewers = $currentViewers->filter(function ($viewer) use ($authGuard) {
-            return $viewer['id'] != auth()->guard($authGuard)->id();
+        $currentUserId = Gaze::getCurrentUserId();
+        $filteredViewers = $currentViewers->filter(function ($viewer) use ($currentUserId) {
+            return $viewer['id'] != $currentUserId;
         });
 
         $finalText = '';
@@ -323,7 +323,7 @@ class GazeBanner extends Field
         }
 
         $lockUser = collect($this->currentViewers)->where('has_control', true)->first();
-        $hasControl = isset($lockUser) && $lockUser['id'] == auth()->guard($authGuard)->id();
+        $hasControl = isset($lockUser) && $lockUser['id'] == $currentUserId;
 
         if ($this->isLockable && isset($this->container)) {
             if($form = $this->getLivewire()->getSchema('form')){
